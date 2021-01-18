@@ -1,3 +1,11 @@
+
+
+ //---------------------------------------------------------------
+// Log messages in system log
+function log(msg) {
+    gs.info(msg);
+}
+
 //---------------------------------------------------------------
 // Request access token using the saved application OAuth application
 function getAccessToken () {
@@ -30,16 +38,11 @@ function getSentinelIncidents (endpoint, filter, apiVersion) {
 }
 
 //---------------------------------------------------------------
-// Log messages in system log
-function log(msg) {
-    gs.info(msg);
-}
-
-//---------------------------------------------------------------
 // Create new ServiceNow incidents
-function newIncident (incidents) {
+function createIncidents (incidents) {
 
     var callerId = gs.getProperty('x_556309_microsoft.callerId');
+    var createdIncidents = 0;
 
     for (var i = 0; i < incidents.length; i++) {
 
@@ -57,13 +60,13 @@ function newIncident (incidents) {
             myObj.caller_id = callerId;
 
             myObj.update();
-            gs.info('New incident created - ' + incidents[i].name);
-        }
-        else {
-            gs.info('No new incidents');
+            createdIncidents++;
+            
         }
 
-        }
+    }
+
+    return createdIncidents;
 
 }
 
@@ -76,13 +79,15 @@ var resourceGroup = gs.getProperty('x_556309_microsoft.resourceGroup');
 var workspace = gs.getProperty('x_556309_microsoft.workspace');
 var filter = gs.getProperty('x_556309_microsoft.newIncidentsFilter');
 
+
 // Build API endpoint
 var endpoint =  'https://management.azure.com/subscriptions/' + subscription + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.OperationalInsights/workspaces/' + workspace + '/providers/Microsoft.SecurityInsights/incidents?';
-//log('Endpoint: ' + endpoint + '\nApi version: ' + apiVersion +'\nFilter: ' + filter);
 
+// Get new incidents from Azure Sentinel API 
 var incidents = getSentinelIncidents(endpoint, filter, apiVersion);
-log('Azure Sentinel API queried' + '\nNbr returned incidents: ' + incidents.length + '\nWorkspace: ' + workspace);
-newIncident(incidents);
+log('Azure Sentinel API returned ' + incidents.length + ' new incidents from Workspace ' + workspace);
 
-log('End job');
+// Create new incidents in SNOW
+var createdIncidents = createIncidents(incidents);
+log('New incident created: ' + createdIncidents);
 
