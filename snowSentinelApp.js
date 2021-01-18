@@ -68,13 +68,14 @@
 
         // Prepare request
         var pagedRequest = buildRESTMessageV2();
+        updateLastSync('newIncidentsLastSync');
 
         do {    
             // Request Sentinel incidents
             var pagedResponse = pagedRequest.execute();
             var pagedResponseBody = pagedResponse.getBody();
             var pagedhttpStatus = pagedResponse.getStatusCode();
-            log('Page ' + page + ' response status: ' + pagedhttpStatus);
+            //log('Page ' + page + ' response status: ' + pagedhttpStatus);
             var pagedObj = JSON.parse(pagedResponseBody);
 
             if(pagedhttpStatus == 200) {
@@ -102,6 +103,28 @@
     }
 
     //---------------------------------------------------------------
+    // Updates new incidents last sync
+    function updateLastSync(property) {
+            
+        var myObj = new GlideRecord('x_556309_microsoft_systemutils');
+        now = (new Date()).toISOString();
+
+        myObj.addQuery('property', property);
+        myObj.query();
+
+        if(myObj.next()) {            
+            log('Updating newIncidentsLastSync...\nPrevious value: ' + myObj.value + '\nNew value: ' + now);
+            myObj.value = now;
+            myObj.update();
+
+        }
+        else {
+            log('System property not found!')
+        }
+    }
+
+
+    //---------------------------------------------------------------
     // Create new ServiceNow incidents
     function createIncidents (incidents) {
 
@@ -114,7 +137,7 @@
 
             myObj.addQuery('correlation_id', incidents[i].name);
             myObj.query();
-            gs.info('myObj: ' + myObj.next());
+            //log('myObj: ' + myObj.next());
 
             if(!myObj.next()) {
                 myObj.short_description = incidents[i].properties.title + ' - ' + incidents[i].properties.incidentNumber;
