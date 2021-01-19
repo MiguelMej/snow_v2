@@ -1,81 +1,5 @@
 
 //---------------------------------------------------------------
-// Return Sentinel incidents, based on the filter
-function getSentinelIncidents (id) {
-
-    var filter = null;
-    if(!id) {
-        // update last sync time only for full query, not for single incident by id
-        updateLastSync('newIncidentsLastSync');
-        filter = '(properties/createdTimeUtc gt 2021-01-13T20:00:00.0Z)'; //to change to use table prop
-    }
-    var hasNext = false;
-    var incidents = [];
-    var page = 0;    
-
-    // Prepare request
-    var pagedRequest = buildRESTMessageV2(null, 'get', filter, id);
-
-    do {    
-        // Request Sentinel incidents
-        var pagedResponse = pagedRequest.execute();
-        var pagedResponseBody = pagedResponse.getBody();
-        var pagedhttpStatus = pagedResponse.getStatusCode();
-        var pagedObj = JSON.parse(pagedResponseBody);
-
-        if(pagedhttpStatus == 200) {
-            if(pagedObj.value) {
-                incidents = incidents.concat(pagedObj.value);
-            }
-            else {
-                //one incident only
-                incidents = incidents.concat(pagedObj);
-            }
-        }
-        else {
-            log('Error code: ' + pagedhttpStatus + '\nMessage:\n' + pagedResponseBody);
-        }
-
-
-        if (pagedObj['nextLink']) { // if true, more incidents available
-
-            hasNext = true;
-            var skip = getSkipToken(pagedObj['nextLink']);
-            pagedRequest = buildRESTMessageV2(skip, 'get', filter); 
-            page++;
-        }
-        else {
-            hasNext = false;
-        }
-
-    }while (hasNext);
-    
-    return incidents;
-}
-
-//---------------------------------------------------------------
-// Updates newIncidentsLastSync
-function updateLastSync(property) {
-        
-    var myObj = new GlideRecord('x_556309_microsoft_systemutils');
-    now = (new Date()).toISOString();
-
-    myObj.addQuery('property', property);
-    myObj.query();
-
-    if(myObj.next()) {            
-        log('Updating ' + property + '\nPrevious value: ' + myObj.value + '\nNew value: ' + now);
-        myObj.value = now;
-        myObj.update();
-
-    }
-    else {
-        log('System property not found!');
-    }
-}
-
-
-//---------------------------------------------------------------
 // Create new ServiceNow incidents
 function createIncidents (incidents) {
 
@@ -129,8 +53,10 @@ function createIncidents (incidents) {
 
             myObj.correlation_id = incidents[i].name;
             myObj.caller_id = callerId;
-
+            
+            // record contains the snow incident id
             var record = myObj.insert();
+
             // add tag and comments to Sentinel
             createdIncidents++;
 
@@ -139,7 +65,15 @@ function createIncidents (incidents) {
             myObj.work_notes = "[code]<a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel Incident link</a>[/code]";
             myObj.update();
 
-            //addComments(incident, comments)
+            //Add Sentinel comments to work notes
+            var comments = getIncidentComments(incidents[i].name);
+            if(comments) {
+                comments.forEach(function (comment){
+                    myObj.work_notes = '[code]<b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p>[/code]';
+                    myObj.update();
+                });
+
+            }
             
         }
 
@@ -149,11 +83,6 @@ function createIncidents (incidents) {
 
 }
 
-//---------------------------------------------------------------
-// Add comments to incident
-function addComments (incident, comments) {
-
-}
 
 try {
 
