@@ -57,12 +57,26 @@ function createIncidents (incidents) {
             // record contains the snow incident id
             var record = myObj.insert();
 
-            // add tag and comments to Sentinel
+            // Adds ServiNow incident URL in Sentinel
+            // add tag
+            try {
+                var incidentUrl = createUrlForObject('incident', record);
+                var msg = '<p>(Work notes)\n' + incidentUrl + '</p>';
+                var httpStatus = addIncidentComments(incidents[i].name, msg);
+                if(httpStatus != 201) {
+                    log('ERROR: ' + 'Comment not added to Sentinel');
+                }
+            }
+            catch (ex) {
+                var message = ex.message;
+                log('ERROR: ' + message);
+            }
             createdIncidents++;
 
+            // Add Sentinel incident url link in work notes
             myObj = new GlideRecord('incident');
             myObj.get(record);
-            myObj.work_notes = "[code]<a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel Incident link</a>[/code]";
+            myObj.work_notes = "[code]<a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a>[/code]";
             myObj.update();
 
             //Add Sentinel comments to work notes
@@ -83,14 +97,17 @@ function createIncidents (incidents) {
 
 }
 
+// Creates an url to the created ServiceNow record
+function createUrlForObject(table_name, sys_id){
+    var url = gs.getProperty('glide.servlet.uri') + 'nav_to.do?uri=%2F' + table_name + '.do?sys_id=' + sys_id;
+    return "<a href=" +  url + ">ServiceNow incident link</a>";
+}
 
+//---------------------------------------------------------------
+    // Main
 try {
 
-    //---------------------------------------------------------------
-    // Main
-    
-    // Get new incidents from Azure Sentinel API 
-    //var incidents = getSentinelIncidents('a4588555-295b-4c8b-9cdc-b17c5126bb7c');
+    // Get new incidents from Azure Sentinel API
     var incidents = getSentinelIncidents();
     
     log('Azure Sentinel API returned ' + incidents.length + ' new incidents.');
@@ -102,5 +119,5 @@ try {
 }
 catch (ex) {
     var message = ex.message;
-    gs.info('ERROR: ' + message);
+    log('ERROR: ' + message);
 }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------
 // This function build the ServiceNow REST message to get the Sentinel incients
-function buildRESTMessageV2(skipToken, method, filter, incidentId) {
+function buildRESTMessageV2(skipToken, method, filter, incidentId, body) {
 
     // Get app properties for API call
     var subscription = gs.getProperty('x_556309_microsoft.subscription');
@@ -32,6 +32,9 @@ function buildRESTMessageV2(skipToken, method, filter, incidentId) {
 
     if(skipToken) { 
         request.setQueryParameter('$skipToken', skipToken);
+    }
+    if(body) {
+        request.setRequestBody(JSON.stringify(body));
     }
     
     request.setEndpoint(endpoint);
