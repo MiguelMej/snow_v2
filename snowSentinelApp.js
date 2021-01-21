@@ -49,29 +49,20 @@ function createIncidents (incidents) {
             else {
                 myObj.assigned_to = incidents[i].properties.owner.userPrincipalName;
             }
-
-
+            
+            // Correlation id is used to link the SNOW incident to Sentinel incident
             myObj.correlation_id = incidents[i].name;
             myObj.caller_id = callerId;
             
-            // record contains the snow incident id
-            var record = myObj.insert();
-
-            // Adds ServiNow incident URL in Sentinel
-            // add tag
+            // record contains the snow incident id and incident is saved in the database
             try {
-                var incidentUrl = createUrlForObject('incident', record);
-                var msg = '<p>(Work notes)\n' + incidentUrl + '</p>';
-                var httpStatus = addIncidentComments(incidents[i].name, msg);
-                if(httpStatus != 201) {
-                    log('ERROR: ' + 'Comment not added to Sentinel');
-                }
+                var record = myObj.insert();
+                createdIncidents++;
             }
-            catch (ex) {
+            catch(ex) {
                 var message = ex.message;
-                log('ERROR: ' + message);
+                log('ERROR inserting incident: ' + message);
             }
-            createdIncidents++;
 
             // Add Sentinel incident url link in work notes
             myObj = new GlideRecord('incident');
@@ -87,6 +78,29 @@ function createIncidents (incidents) {
                     myObj.update();
                 });
 
+            }
+
+            // Adds ServiceNow incident number in Sentinel tags
+            var labelIncidentId = [{
+                "labelName": myObj.number.toString(),
+                "labelType": "User"
+            }];
+            var properties = incidents[i].properties;
+            properties.labels = labelIncidentId;
+            updateSentinelIncident(incidents[i].name, properties);
+            
+            // Adds SNOW incident link in Sentinel
+            try {
+                var incidentUrl = createUrlForObject('incident', record);
+                var msg = '<p>(Work notes)</p>' + incidentUrl;
+                var httpStatus = addIncidentComments(incidents[i].name, msg);
+                if(httpStatus != 201) {
+                    log('ERROR: incident ' + myObj.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
+                }
+            }
+            catch (ex) {
+                var message = ex.message;
+                log('ERROR adding SNOW incident link to Sentinel: ' + message);
             }
             
         }
@@ -119,5 +133,5 @@ try {
 }
 catch (ex) {
     var message = ex.message;
-    log('ERROR: ' + message);
+    log('ERROR main: ' + message);
 }

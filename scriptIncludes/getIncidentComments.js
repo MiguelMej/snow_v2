@@ -46,6 +46,10 @@ function getIncidentComments (incidentId, lastSync) {
     var filteredComments = comments.filter(function (comment) {
         return comment.properties.message.toLowerCase().indexOf('(work notes)') === -1;
     });
+    filteredComments = filteredComments.filter(function (comment) {
+        return comment.properties.message.toLowerCase().indexOf('[code]') === -1;
+    });
+    
 
     // Sort comments by creation date
     if(filteredComments) {
