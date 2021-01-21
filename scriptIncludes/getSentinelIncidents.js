@@ -6,7 +6,7 @@ function getSentinelIncidents (id) {
     if(!id) {
         // update last sync time only for full query, not for single incident by id
         updateLastSync('newIncidentsLastSync');
-        filter = '(properties/createdTimeUtc gt 2021-01-13T20:00:00.0Z)'; //to change to use table prop
+        filter = '(properties/createdTimeUtc gt '+ gs.getProperty('x_556309_microsoft.newIncidentsFilter') + ')';//2021-01-13T20:00:00.0Z)'; //to change to use table prop
     }
     var hasNext = false;
     var incidents = [];
