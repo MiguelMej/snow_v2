@@ -1,12 +1,19 @@
 //---------------------------------------------------------------
 // Return Sentinel incidents, based on the filter
-function getSentinelIncidents (id) {
+function getSentinelIncidents (id, operation) {
 
     var filter = null;
+    var lastSync = null;
+
     if(!id) {
-        // update last sync time only for full query, not for single incident by id
-        updateLastSync('newIncidentsLastSync');
-        filter = '(properties/createdTimeUtc gt '+ gs.getProperty('x_556309_microsoft.newIncidentsFilter') + ')';//2021-01-13T20:00:00.0Z)'; //to change to use table prop
+        if(operation === 'update') {
+            lastSync = getLastSync('modifiedIncidentsLastSync'); //returns last sync from sentinelUtils table
+            filter = '(properties/lastModifiedTimeUtc gt '+ lastSync + ')';
+        }
+        else { // searching for new incidents
+            lastSync = getLastSync('newIncidentsLastSync');
+            filter = '(properties/createdTimeUtc gt '+ lastSync + ')';
+        }
     }
     var hasNext = false;
     var incidents = [];

@@ -4,12 +4,16 @@ function updateSentinelIncident (incidentId, properties) {
     
     var incident = getSentinelIncidents(incidentId)[0]; // getSentinelIncidents returns an array of one element
     incident.properties.status = properties.status;
+    if(incident.properties.status.toLowerCase() == 'closed') {
+        incident.properties.classification = properties.classification; //Sentinel requires reason when closing incident
+        incident.properties.classificationComment = properties.classificationComment;
+    }
     incident.properties.severity = properties.severity;
     incident.properties.owner.userPrincipalName = properties.owner.userPrincipalName;
     
-    if(incident.properties.labels.length >= 0) {
+    if(incident.properties.labels.length > 0) {
         incident.properties.labels = incident.properties.labels.concat(properties.labels);
-        // Dedup array
+        // Dedup array -> to solve
         incident.properties.labels = incident.properties.labels.filter(function (item,index){
             return (incident.properties.labels.indexOf(item) == index);
         });
@@ -18,6 +22,7 @@ function updateSentinelIncident (incidentId, properties) {
         incident.properties.labels = properties.labels;
     }
     
+
     var body = {
         "etag": incident.etag,
         "properties": incident.properties

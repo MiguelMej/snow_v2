@@ -2,13 +2,14 @@
 // Get comments to incident
 function getIncidentComments (incidentId, lastSync) {
 
+    var hasNext = false;
+    var comments = [];
+    var filteredComments = [];
     var filter = null;
     if(lastSync) {
 
         filter = '(properties/createdTimeUtc gt ' + lastSync + ')';
     }
-    var hasNext = false;
-    var comments = [];
 
     // Prepare request
     incidentId = incidentId + '/comments';
@@ -43,7 +44,7 @@ function getIncidentComments (incidentId, lastSync) {
     }while (hasNext);
     
     // Filters out the comments created by SNOW. This app adds "(Work notes)" when adding a comment to Sentinel
-    var filteredComments = comments.filter(function (comment) {
+    filteredComments = comments.filter(function (comment) {
         return comment.properties.message.toLowerCase().indexOf('(work notes)') === -1;
     });
     filteredComments = filteredComments.filter(function (comment) {

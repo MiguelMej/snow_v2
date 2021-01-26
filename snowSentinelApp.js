@@ -121,14 +121,17 @@ function createUrlForObject(table_name, sys_id){
     // Main
 try {
 
-    // Get new incidents from Azure Sentinel API
+    // Get all new incidents from Azure Sentinel API
     var incidents = getSentinelIncidents();
-    
+    updateLastSync('newIncidentsLastSync');
+
     log('Azure Sentinel API returned ' + incidents.length + ' new incidents.');
 
-    // Create new incidents in SNOW
-    var createdIncidents = createIncidents(incidents);
-    log('New incident created: ' + createdIncidents);
+    if(incidents.length > 0){
+        // Create new incidents in SNOW
+        var createdIncidents = createIncidents(incidents);
+        log('New incident created: ' + createdIncidents);
+    }
 
 }
 catch (ex) {
