@@ -21,7 +21,7 @@
                             properties.severity = 'High'; 
                             break;
                         default: 
-                            properties.severity = 'Low'; 
+                            properties.severity = 'Medium'; 
                             break;
                     }
 

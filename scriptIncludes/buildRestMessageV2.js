@@ -7,6 +7,14 @@ function buildRESTMessageV2(skipToken, method, filter, incidentId, body) {
     var resourceGroup = gs.getProperty('x_556309_microsoft.resourceGroup');
     var workspace = gs.getProperty('x_556309_microsoft.workspace');
     var apiVersion = gs.getProperty('x_556309_microsoft.apiVersion');
+
+    if(incidentId)  {
+        if(incidentId.includes('/entities')) {
+            apiVersion = '2019-01-01-preview';
+        }
+    }
+  
+
     // Compose API endpoint
     var endpoint =  'https://management.azure.com/subscriptions/' + subscription + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.OperationalInsights/workspaces/' + workspace + '/providers/Microsoft.SecurityInsights/incidents?';
     var token = getAccessToken();

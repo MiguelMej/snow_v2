@@ -1,4 +1,3 @@
-
 //---------------------------------------------------------------
 // Create new ServiceNow incidents
 function createIncidents (incidents) {
@@ -136,5 +135,5 @@ try {
 }
 catch (ex) {
     var message = ex.message;
-    log('ERROR main: ' + message);
+    log('ERROR main createNewIncidents: ' + message);
 }

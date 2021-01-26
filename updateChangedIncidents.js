@@ -18,23 +18,38 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
             changes = compareChanges(modifiedIncidents[i].properties, myObj);
 
             if(Object.keys(changes).length > 0) {
-                switch(modifiedIncidents[i].properties.severity.toLowerCase()) {
-                    case 'low': myObj.impact = 3; break;
-                    case 'medium': myObj.impact = 2; break;
-                    case 'high': myObj.impact = 1; break;
-                }
-            
-                switch(modifiedIncidents[i].properties.status.toLowerCase()) {
-                    case 'new': myObj.state = 1; break;
-                    case 'active': myObj.state = 2; break;
-                    case 'closed': myObj.state = 7; break;             
+                
+                
+                if(changes.hasOwnProperty('severitySentinel')) {
+                    switch(modifiedIncidents[i].properties.severity.toLowerCase()) {
+                        case 'low': myObj.impact = 3; break;
+                        case 'medium': myObj.impact = 2; break;
+                        case 'high': myObj.impact = 1; break;
+                    }
                 }
 
-                if(modifiedIncidents[i].properties.owner.userPrincipalName) {myObj.assigned_to.email = modifiedIncidents[i].properties.owner.userPrincipalName;}
+                if(changes.hasOwnProperty('statusSentinel')) { 
+                    switch(modifiedIncidents[i].properties.status.toLowerCase()) {
+                        case 'new': myObj.state = 1; break;
+                        case 'active': myObj.state = 2; break;
+                        case 'closed': myObj.state = 7; break;                        
+                    }
+                }
+
+                if(changes.hasOwnProperty('ownerSentinel')) {
+                    if(modifiedIncidents[i].properties.owner.userPrincipalName) {myObj.assigned_to.email = modifiedIncidents[i].properties.owner.userPrincipalName;}
+                }
                 
-                myObj.update();
-                updatedIncidents++;
-                log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));
+                try {
+                    myObj.setWorkflow(false);
+                    myObj.update();
+                    updatedIncidents++;
+                    log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));
+                }
+                catch(ex) {
+                    var message = ex.message;
+                    log('ERROR: Incident ' + myObj.number + ' update failed\n' + message);
+                }
             }
             
             // add comments sync
@@ -82,5 +97,5 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
     }
     catch (ex) {
         var message = ex.message;
-        log('ERROR main: ' + message);
+        log('ERROR main updateChangedIncidents: ' + message);
     }

@@ -10,6 +10,12 @@ function getLastSync(property) {
 
 	if(myObj.next()) {            
 		lastSync = myObj.value;
+		if(!lastSync) { // if value not populated, go back 30 days ago
+			var date = new Date();
+			date.setDate(date.getDate() - 30);
+			lastSync = date.toISOString();
+			updateLastSync(property, lastSync);
+		}
 
 	}
 	else {

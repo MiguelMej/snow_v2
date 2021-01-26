@@ -1,9 +1,12 @@
 //---------------------------------------------------------------
 // Updates newIncidentsLastSync
-function updateLastSync(property) {
+function updateLastSync(property, date) {
 
 	var myObj = new GlideRecord('x_556309_microsoft_systemutils');
-	now = (new Date()).toISOString();
+	var now = (new Date()).toISOString();
+	if(date) {
+		now = date;
+	}
 
 	myObj.addQuery('property', property);
 	myObj.query();
