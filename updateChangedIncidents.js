@@ -37,7 +37,9 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
                 }
 
                 if(changes.hasOwnProperty('ownerSentinel')) {
-                    if(modifiedIncidents[i].properties.owner.userPrincipalName) {myObj.assigned_to.email = modifiedIncidents[i].properties.owner.userPrincipalName;}
+                    if(modifiedIncidents[i].properties.owner.userPrincipalName) {
+                        myObj.assigned_to = modifiedIncidents[i].properties.owner.userPrincipalName;
+                    }
                 }
                 
                 try {

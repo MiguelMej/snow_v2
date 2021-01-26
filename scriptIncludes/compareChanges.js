@@ -24,7 +24,7 @@ function compareChanges(sentinelIncident, snowIncident) {
         changes.severitySentinel = sentinelIncident.severity;
         changes.severitySnow = snowIncident.impact.toString();
     }
-    if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email) && (snowIncident.assigned_to.email)) {
+    if(sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString()) {
         changes.ownerSentinel = sentinelIncident.owner.userPrincipalName; 
         changes.ownerSnow = snowIncident.assigned_to.email.toString();
     }
