@@ -9,13 +9,26 @@ function updateSentinelIncident (incidentId, properties) {
         incident.properties.classificationComment = properties.classificationComment;
     }
     incident.properties.severity = properties.severity;
-    incident.properties.owner.userPrincipalName = properties.owner.userPrincipalName;
+    if(properties.owner) {
+        incident.properties.owner.userPrincipalName = properties.owner.userPrincipalName;
+    }
+    else {
+        incident.properties.owner = {
+            "objectId": null,
+            "email": null,
+            "assignedTo": null,
+            "userPrincipalName": null
+        };
+    }
     
     if(incident.properties.labels.length > 0) {
         incident.properties.labels = incident.properties.labels.concat(properties.labels);
-        // Dedup array -> to solve
-        incident.properties.labels = incident.properties.labels.filter(function (item,index){
-            return (incident.properties.labels.indexOf(item) == index);
+        // Dedup array
+        var temp = incident.properties.labels;
+        temp = temp.map(function(i){return i.labelName;});
+        temp = temp.filter(function(item, index) {return temp.indexOf(item) === index;});
+        incident.properties.labels = temp.map(function(i){
+            return {"labelName": i, "labelType": "User"};
         });
     }
     else {
@@ -29,9 +42,12 @@ function updateSentinelIncident (incidentId, properties) {
     };
 
     var request = buildRESTMessageV2(null, 'put', null, incidentId, body);
-
-    var response = request.execute();
-    var httpStatus = response.getStatusCode();
-
+    try {
+        var response = request.execute();
+        var httpStatus = response.getStatusCode();
+    }
+    catch(ex) {
+        log('ERROR updateSentinelIncidents - ' + JSON.stringify(response) + ' - ' + message);
+    }
     return httpStatus;
 } 

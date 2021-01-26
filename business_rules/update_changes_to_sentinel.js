@@ -8,7 +8,7 @@
             
             if (Object.keys(changes).length > 0) { //if at least one change
 
-                if(changes.hasOwnProperty('severitySentinel')) { //status must be updated in Sentinel
+                if(changes.hasOwnProperty('severitySentinel')) { //severity must be updated in Sentinel
 
                     switch(myObj.impact.toString()) {
                         case '3': 
@@ -28,7 +28,7 @@
                     
                 }
                 
-                if(changes.hasOwnProperty('statusSentinel')) { //severity must be updated in Sentinel
+                if(changes.hasOwnProperty('statusSentinel')) { //status must be updated in Sentinel
                     switch(myObj.state.toString()) {
                         case '1': 
                             properties.status = 'New'; 
@@ -55,15 +55,25 @@
                 }
                 
                 if(changes.hasOwnProperty('ownerSentinel')) { //owner must be updated in Sentinel
-                    properties.owner.userPrincipalName = myObj.assigned_to.email.toString();
+                    if(!myObj.assigned_to.email.toString()) {
+                        properties.owner = null;
+                    }
+                    else {
+                        properties.owner.userPrincipalName = myObj.assigned_to.email.toString();
+                    }
                 }
-                var httpStatus = updateSentinelIncident(myObj.correlation_id, properties);
+                
+                var httpStatus = updateSentinelIncident(myObj.correlation_id, properties); //update Sentinel incident
 
                 if(httpStatus == 200) {
-                    log('Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
+                    log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
+                }
+                else if(httpStatus == 409) {
+                    httpStatus = updateSentinelIncident(myObj.correlation_id, properties);
+                    log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
                 }
                 else {
-                    log('Sentinel Incident ' + incident[0].properties.incidentNumber + ' update fails. Code: ' + httpStatus + '\nChanges: ' + JSON.stringify(changes));
+                    log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' update fails. Code: ' + httpStatus + '\nChanges: ' + JSON.stringify(changes));
                 }
 
             }
@@ -71,6 +81,6 @@
     }
     catch (ex) {
         var message = ex.message;
-        log('ERROR updating incident ' + current.number + ' - ' + message);
+        log('ERROR updating incident (business rule)' + current.number + ' - ' + message);
             }
 })(current, previous);
