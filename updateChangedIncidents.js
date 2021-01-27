@@ -30,9 +30,14 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
 
                 if(changes.hasOwnProperty('statusSentinel')) { 
                     switch(modifiedIncidents[i].properties.status.toLowerCase()) {
-                        case 'new': myObj.state = 1; break;
-                        case 'active': myObj.state = 2; break;
-                        case 'closed': myObj.state = 7; break;                        
+                        case 'new': myObj.incident_state = 1; break;
+                        case 'active': myObj.incident_state = 2; break;
+                        case 'closed': {
+                            myObj.incident_state = 6;
+                            myObj.close_code = 'Closed/Resolved By Caller';
+                            myObj.close_notes = 'Incident closed in Sentinel';
+                            break;                
+                        }                         
                     }
                 }
 
@@ -43,7 +48,7 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
                 }
                 
                 try {
-                    myObj.setWorkflow(false);
+                    myObj.setWorkflow(false);;
                     myObj.update();
                     updatedIncidents++;
                     log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));

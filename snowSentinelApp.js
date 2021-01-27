@@ -32,14 +32,14 @@ function createIncidents (incidents) {
                 case 'new': incidentStatus = 1; break;
                 case 'active': incidentStatus = 2; break;
                 case 'closed': {
-                                    incidentStatus = 7; //In SNOW, "7" is closed, "6" is resolved
+                                    incidentStatus = 6; //In SNOW, "7" is closed, "6" is resolved
                                     myObj.close_code = 'Closed/Resolved By Caller';
                                     myObj.close_notes = 'Incident was already closed in Sentinel';
                                     break;                
                                 }
                 default: incidentStatus = 1; break;
             }
-            myObj.state = incidentStatus;
+            myObj.incident_state = incidentStatus;
 
             // If owner email empty, use UPN
             if(incidents[i].properties.owner.email) {
