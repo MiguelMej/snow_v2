@@ -35,7 +35,7 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
                         case 'closed': {
                             myObj.incident_state = 6;
                             myObj.close_code = 'Closed/Resolved By Caller';
-                            myObj.close_notes = 'Incident closed in Sentinel';
+                            myObj.close_notes = 'Incident closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
                             break;                
                         }                         
                     }
@@ -48,7 +48,7 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
                 }
                 
                 try {
-                    myObj.setWorkflow(false);;
+                    myObj.setWorkflow(false);
                     myObj.update();
                     updatedIncidents++;
                     log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));

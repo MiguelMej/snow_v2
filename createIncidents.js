@@ -18,7 +18,7 @@ function createIncidents (incidents) {
         if(!myObj.next()) {
             myObj.initialize();
             myObj.short_description = incidents[i].properties.title + ' - Incident number: ' + incidents[i].properties.incidentNumber;
-            myObj.description = 'Azure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join();
+            myObj.description = 'Azure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join() + '\nIncident link: ' + incidents[i].properties.incidentUrl;
             
             switch(incidents[i].properties.severity.toLowerCase()) {
                 case 'low': incidentSeverity = 3; break;
@@ -34,7 +34,7 @@ function createIncidents (incidents) {
                 case 'closed': {
                                     incidentStatus = 6; //In SNOW, "7" is closed, "6" is resolved
                                     myObj.close_code = 'Closed/Resolved By Caller';
-                                    myObj.close_notes = 'Incident was already closed in Sentinel';
+                                    myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
                                     break;                
                                 }
                 default: incidentStatus = 1; break;
@@ -66,9 +66,17 @@ function createIncidents (incidents) {
             // Add Sentinel incident url link in work notes
             myObj = new GlideRecord('incident');
             myObj.get(record);
+            myObj.setWorkflow(false);
             myObj.work_notes = "[code]<a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a>[/code]";
             myObj.update();
 
+            // Add incident entities to Snow
+            var html = getIncidentEntities(incidents[i].name, 'html');
+            if(html) {
+                myObj.setWorkflow(false);
+                myObj.work_notes = '[code]' + html + '[/code]';
+                myObj.update();
+            }
             //Add Sentinel comments to work notes
             var comments = getIncidentComments(incidents[i].name);
             if(comments) {
@@ -96,6 +104,7 @@ function createIncidents (incidents) {
                 if(httpStatus != 201) {
                     log('ERROR: incident ' + myObj.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
                 }
+
             }
             catch (ex) {
                 var message = ex.message;

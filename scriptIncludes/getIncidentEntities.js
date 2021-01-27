@@ -1,7 +1,7 @@
 
 //---------------------------------------------------------------
-// Get entities to incident
-function getIncidentEntities (incidentId) {
+// Get incident entities 
+function getIncidentEntities (incidentId, format) {
 
     var hasNext = false;
     var filter = null;
@@ -40,12 +40,47 @@ function getIncidentEntities (incidentId) {
     }while (hasNext);
     
     // Compose entities objects
-    var entitiesList = entities.map(function(entity) {
-       return {
-           "type": entity.kind,
-           "details": entity.properties
-       } 
-    })
+    try {
+        if(entities.length > 0){
+            //log('entities: ' + JSON.stringify(entities));
+            var entitiesList = entities.map(function(entity) {
+                return {
+                    "type": entity.kind,
+                    "details": entity.properties
+                };
+            });
 
-    return entitiesList;
+            if(format.toLowerCase() === 'html') {
+                return entitiesToHtmlTable(entitiesList);
+            }
+            else {
+                return entitiesList;
+            }
+        }
+        else {
+            return null;
+        }
+    }
+    catch (ex) {
+        var message = ex.message;
+        log('ERROR getIncidentEntities: ' + message);
+    }
+}
+
+    
+
+function entitiesToHtmlTable (entities) {
+    
+    var htmlTable = '<table style="width: 80%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black"><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityType</th><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityDetails</th></tr></thead><tbody></tbody>';
+    
+    for (var i = 0; i < entities.length; i++) {
+        var tr = '<tr style="border: 1px solid black"><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">';
+
+        tr += entities[i].type + '</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + JSON.stringify(entities[i].details).replace(',', '<br>').replace('{', '').replace('}', '') + '</td></tr>';
+        htmlTable += tr;
+    }
+
+    htmlTable += '</tbody></table>'; //closing table
+
+    return htmlTable;
 }
