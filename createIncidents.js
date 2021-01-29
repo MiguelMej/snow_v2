@@ -70,6 +70,14 @@ function createIncidents (incidents) {
             myObj.work_notes = "[code]<a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a>[/code]";
             myObj.update();
 
+            // Add incident alerts details
+			var html = getIncidentAlerts(incidents[i].name, 'html');
+            if(html) {
+                myObj.setWorkflow(false);
+                myObj.work_notes = '[code]' + html + '[/code]';
+                myObj.update();
+            }
+
             // Add incident entities to Snow
             var html = getIncidentEntities(incidents[i].name, 'html');
             if(html) {

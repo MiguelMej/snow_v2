@@ -9,7 +9,7 @@ function buildRESTMessageV2(skipToken, method, filter, incidentId, body) {
     var apiVersion = gs.getProperty('x_556309_microsoft.apiVersion');
 
     if(incidentId)  {
-        if(incidentId.includes('/entities')) {
+        if(incidentId.includes('/entities') || incidentId.includes('/alerts')) {
             apiVersion = '2019-01-01-preview';
         }
     }
