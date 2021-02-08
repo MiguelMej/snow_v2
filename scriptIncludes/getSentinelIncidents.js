@@ -4,6 +4,7 @@ function getSentinelIncidents (id, operation) {
 
     var filter = null;
     var lastSync = null;
+    var customFilter = gs.getProperty('x_556309_microsoft.newIncidentsFilter');
 
     if(!id) {
         if(operation === 'update') {
@@ -13,6 +14,11 @@ function getSentinelIncidents (id, operation) {
         else { // searching for new incidents
             lastSync = getLastSync('newIncidentsLastSync');
             filter = '(properties/createdTimeUtc gt '+ lastSync + ')';
+        }
+
+        // If there is a custom filter added in the app system properties, in addition to the time
+        if(customFilter.length > 0) {
+            filter += ' and ' + customFilter;
         }
     }
     var hasNext = false;
