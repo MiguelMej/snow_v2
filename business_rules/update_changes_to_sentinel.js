@@ -39,13 +39,13 @@
                         case '6': { 
                                     properties.status = 'Closed'; 
                                     properties.classification = 'Undetermined';
-                                    properties.classificationComment = 'Incident marked as Resolved in ServiceNow';
+                                    properties.classificationComment = 'Incident marked as Resolved in ServiceNow: ' + current.close_notes;
                                     break;                
                                 }
                         case '7': { 
                                     properties.status = 'Closed';
                                     properties.classification = 'Undetermined';
-                                    properties.classificationComment = 'Incident marked as Closed in ServiceNow';
+                                    properties.classificationComment = 'Incident marked as Resolved in ServiceNow: ' + current.close_notes;
                                     break;                
                         }
                         default: 

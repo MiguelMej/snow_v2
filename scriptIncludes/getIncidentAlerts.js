@@ -82,7 +82,7 @@ function getIncidentAlerts (incidentId, format) {
 
 function alertsToHtmlTable (alerts) {
     
-    var htmlTable = '<table style="width: 80%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black">';
+    var htmlTable = '<table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black">';
     htmlTable += '<th style=" background-color: #dddddd; border: 1px solid #dddddd; text-align: left; padding: 8px;">Name</th>';
     htmlTable += '<th style="background-color: #dddddd; border: 1px solid #dddddd; text-align: left; padding: 8px;">Status</th>';
     htmlTable += '<th style="background-color: #dddddd; border: 1px solid #dddddd; text-align: left; padding: 8px;">Severity</th>';
