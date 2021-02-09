@@ -3,6 +3,7 @@
 function createIncidents (incidents) {
 
     var callerId = gs.getProperty('x_556309_microsoft.callerId');
+    var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
     var createdIncidents = 0;
     var incidentSeverity = 1;
     var incidentStatus = 1;
@@ -10,7 +11,7 @@ function createIncidents (incidents) {
 
     for (var i = 0; i < incidents.length; i++) {
 
-        myObj = new GlideRecord('incident');
+        myObj = new GlideRecord(incidentTable);
 
         myObj.addQuery('correlation_id', incidents[i].name);
         myObj.query();
@@ -64,7 +65,7 @@ function createIncidents (incidents) {
             }
 
             // Add Sentinel incident url link in work notes
-            myObj = new GlideRecord('incident');
+            myObj = new GlideRecord(incidentTable);
             myObj.get(record);
             myObj.setWorkflow(false);
             myObj.work_notes = "[code]<a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a>[/code]";

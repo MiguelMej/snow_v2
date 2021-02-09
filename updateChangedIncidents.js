@@ -1,5 +1,6 @@
 function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
     
+    var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
     var updatedIncidents = 0;
     var addedComments;
     var myObj;
@@ -9,7 +10,7 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
     for (var i = 0; i < modifiedIncidents.length; i++) {
 
         addedComments = 0;
-        myObj = new GlideRecord('incident');
+        myObj = new GlideRecord(incidentTable);
         myObj.addQuery('correlation_id', modifiedIncidents[i].name);
         myObj.query();
 
