@@ -4,6 +4,7 @@ function createIncidents (incidents) {
 
     var callerId = gs.getProperty('x_556309_microsoft.callerId');
     var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
+    var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
     var createdIncidents = 0;
     var incidentSeverity = 1;
     var incidentStatus = 1;
@@ -13,7 +14,7 @@ function createIncidents (incidents) {
 
         myObj = new GlideRecord(incidentTable);
 
-        myObj.addQuery('correlation_id', incidents[i].name);
+        myObj.addQuery(incidentUniqueKey, incidents[i].name);
         myObj.query();
 
         if(!myObj.next()) {
