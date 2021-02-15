@@ -1,4 +1,4 @@
-function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
+function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSync) {
     
     var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
     var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
@@ -62,10 +62,10 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
             }
             
             // add comments sync
-            newComments = getIncidentComments(modifiedIncidents[i].name, modifiedLastSync); //returns added comments since last sync
+            newComments = getIncidentComments(environment, modifiedIncidents[i].name, modifiedLastSync); //returns added comments since last sync
             if(newComments.length > 0) {
                 newComments.forEach(function (comment) {
-                    myObj.work_notes = '[code]<b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p>[/code]';
+                    myObj.work_notes = '[code]<div class="snow"><b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p></div>[/code]';
                     myObj.update();
                     addedComments++;
                 });
@@ -80,7 +80,7 @@ function updateChangedIncidents (modifiedIncidents, modifiedLastSync) {
         else {
             var incidentToCreate = []; 
 			incidentToCreate.push(modifiedIncidents[i]);
-            createIncidents(incidentToCreate);
+            createIncidents(environment, incidentToCreate);
         }
     }
     

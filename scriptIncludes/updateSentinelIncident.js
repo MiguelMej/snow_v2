@@ -1,6 +1,6 @@
 //Function to update Sentinel incidents
 
-function updateSentinelIncident (incidentId, properties) {
+function updateSentinelIncident (environment, incidentId, properties) {
     
     var incident = getSentinelIncidents(incidentId)[0]; // getSentinelIncidents returns an array of one element
     incident.properties.status = properties.status;
@@ -41,7 +41,7 @@ function updateSentinelIncident (incidentId, properties) {
         "properties": incident.properties
     };
 
-    var request = buildRESTMessageV2(null, 'put', null, incidentId, body);
+    var request = buildRESTMessageV2(environment, null, 'put', null, incidentId, body);
     try {
         var response = request.execute();
         var httpStatus = response.getStatusCode();

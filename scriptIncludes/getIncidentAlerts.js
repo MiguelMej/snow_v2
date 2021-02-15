@@ -1,7 +1,6 @@
-a
 //---------------------------------------------------------------
 // Get incident alerts 
-function getIncidentAlerts (incidentId, format) {
+function getIncidentAlerts (environment, incidentId, format) {
 
     var hasNext = false;
     var filter = null;
@@ -9,7 +8,7 @@ function getIncidentAlerts (incidentId, format) {
 
     // Prepare request
     incidentId = incidentId + '/alerts';
-    var pagedRequest = buildRESTMessageV2(null, 'post', filter, incidentId);
+    var pagedRequest = buildRESTMessageV2(environment, null, 'post', filter, incidentId);
 
     do {    
         // Request Sentinel incidents
@@ -31,7 +30,7 @@ function getIncidentAlerts (incidentId, format) {
 
             hasNext = true;
             var skip = getSkipToken(pagedObj['nextLink']);
-            pagedRequest = buildRESTMessageV2(skip, 'post', filter, incidentId); 
+            pagedRequest = buildRESTMessageV2(environment, skip, 'post', filter, incidentId); 
         }
         else {
             hasNext = false;
@@ -82,7 +81,7 @@ function getIncidentAlerts (incidentId, format) {
 
 function alertsToHtmlTable (alerts) {
     
-    var htmlTable = '<table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black">';
+    var htmlTable = '<div class="snow"><table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black">';
     htmlTable += '<th style=" background-color: #dddddd; border: 1px solid #dddddd; text-align: left; padding: 8px;">Name</th>';
     htmlTable += '<th style="background-color: #dddddd; border: 1px solid #dddddd; text-align: left; padding: 8px;">Status</th>';
     htmlTable += '<th style="background-color: #dddddd; border: 1px solid #dddddd; text-align: left; padding: 8px;">Severity</th>';
@@ -113,7 +112,7 @@ function alertsToHtmlTable (alerts) {
         htmlTable += tr;
     }
 
-    htmlTable += '</tbody></table>'; //closing table
+    htmlTable += '</tbody></table></div>'; //closing table
 
     return htmlTable;
 }

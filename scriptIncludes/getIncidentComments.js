@@ -1,6 +1,6 @@
 //---------------------------------------------------------------
 // Get comments to incident
-function getIncidentComments (incidentId, lastSync) {
+function getIncidentComments (environment, incidentId, lastSync) {
 
     var hasNext = false;
     var comments = [];
@@ -13,7 +13,7 @@ function getIncidentComments (incidentId, lastSync) {
 
     // Prepare request
     incidentId = incidentId + '/comments';
-    var pagedRequest = buildRESTMessageV2(null, 'get', filter, incidentId);
+    var pagedRequest = buildRESTMessageV2(environment, null, 'get', filter, incidentId);
 
     do {    
         // Request Sentinel incidents
@@ -35,7 +35,7 @@ function getIncidentComments (incidentId, lastSync) {
 
             hasNext = true;
             var skip = getSkipToken(pagedObj['nextLink']);
-            pagedRequest = buildRESTMessageV2(skip, 'get', filter, incidentId); 
+            pagedRequest = buildRESTMessageV2(environment, skip, 'get', filter, incidentId); 
         }
         else {
             hasNext = false;
@@ -45,12 +45,8 @@ function getIncidentComments (incidentId, lastSync) {
     
     // Filters out the comments created by SNOW. This app adds "(Work notes)" when adding a comment to Sentinel
     filteredComments = comments.filter(function (comment) {
-        return comment.properties.message.toLowerCase().indexOf('(work notes)') === -1;
+        return comment.properties.message.toLowerCase().indexOf('<div class="snow">') === -1;
     });
-    filteredComments = filteredComments.filter(function (comment) {
-        return comment.properties.message.toLowerCase().indexOf('[code]') === -1;
-    });
-    
 
     // Sort comments by creation date
     if(filteredComments) {

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------
 // Return Sentinel incidents, based on the filter
-function getSentinelIncidents (id, operation) {
+function getSentinelIncidents (environment, id, operation) {
 
     var filter = null;
     var lastSync = null;
@@ -26,7 +26,7 @@ function getSentinelIncidents (id, operation) {
     var page = 0;    
 
     // Prepare request
-    var pagedRequest = buildRESTMessageV2(null, 'get', filter, id);
+    var pagedRequest = buildRESTMessageV2(environment, null, 'get', filter, id);
 
     do {    
         // Request Sentinel incidents
@@ -45,7 +45,7 @@ function getSentinelIncidents (id, operation) {
             }
         }
         else {
-            log('Error code: ' + pagedhttpStatus + '\nMessage:\n' + pagedResponseBody);
+            log('Environment:' + environment.environment_name + '\nError code: ' + pagedhttpStatus + '\nMessage:\n' + pagedResponseBody);
         }
 
 
@@ -53,7 +53,7 @@ function getSentinelIncidents (id, operation) {
 
             hasNext = true;
             var skip = getSkipToken(pagedObj['nextLink']);
-            pagedRequest = buildRESTMessageV2(skip, 'get', filter); 
+            pagedRequest = buildRESTMessageV2(environment, skip, 'get', filter); 
             page++;
         }
         else {

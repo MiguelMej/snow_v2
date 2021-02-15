@@ -1,19 +1,19 @@
 //---------------------------------------------------------------
 // This function build the ServiceNow REST message to get the Sentinel incients
-function buildRESTMessageV2(skipToken, method, filter, incidentId, body) {
+function buildRESTMessageV2(environment, skipToken, method, filter, incidentId, body) {
 
     // Get app properties for API call
-    var subscription = gs.getProperty('x_556309_microsoft.subscription');
-    var resourceGroup = gs.getProperty('x_556309_microsoft.resourceGroup');
-    var workspace = gs.getProperty('x_556309_microsoft.workspace');
+    var subscription = environment.subscription; //gs.getProperty('x_556309_microsoft.subscription');
+    var resourceGroup = environment.resource_group; //gs.getProperty('x_556309_microsoft.resourceGroup');
+    var workspace = environment.workspace; //gs.getProperty('x_556309_microsoft.workspace');
     var apiVersion = gs.getProperty('x_556309_microsoft.apiVersion');
 
     if(incidentId)  {
         if(incidentId.includes('/entities') || incidentId.includes('/alerts')) {
-            apiVersion = '2019-01-01-preview';
+            apiVersion = '2019-01-01-preview'; // alerts and entities only available through the preview version
         }
     }
-  
+
 
     // Compose API endpoint
     var endpoint =  'https://management.azure.com/subscriptions/' + subscription + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.OperationalInsights/workspaces/' + workspace + '/providers/Microsoft.SecurityInsights/incidents?';

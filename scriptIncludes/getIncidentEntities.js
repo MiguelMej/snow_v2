@@ -1,7 +1,7 @@
 
 //---------------------------------------------------------------
 // Get incident entities 
-function getIncidentEntities (incidentId, format) {
+function getIncidentEntities (environment, incidentId, format) {
 
     var hasNext = false;
     var filter = null;
@@ -9,7 +9,7 @@ function getIncidentEntities (incidentId, format) {
 
     // Prepare request
     incidentId = incidentId + '/entities';
-    var pagedRequest = buildRESTMessageV2(null, 'post', filter, incidentId);
+    var pagedRequest = buildRESTMessageV2(environment, null, 'post', filter, incidentId);
 
     do {    
         // Request Sentinel incidents
@@ -31,7 +31,7 @@ function getIncidentEntities (incidentId, format) {
 
             hasNext = true;
             var skip = getSkipToken(pagedObj['nextLink']);
-            pagedRequest = buildRESTMessageV2(skip, 'post', filter, incidentId); 
+            pagedRequest = buildRESTMessageV2(environment, skip, 'post', filter, incidentId); 
         }
         else {
             hasNext = false;
@@ -71,7 +71,7 @@ function getIncidentEntities (incidentId, format) {
 
 function entitiesToHtmlTable (entities) {
     
-    var htmlTable = '<table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black"><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityType</th><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityDetails</th></tr></thead><tbody>';
+    var htmlTable = '<div class="snow"><table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black"><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityType</th><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityDetails</th></tr></thead><tbody>';
     
     for (var i = 0; i < entities.length; i++) {
         var tr = '<tr style="border: 1px solid black"><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">';
@@ -80,7 +80,7 @@ function entitiesToHtmlTable (entities) {
         htmlTable += tr;
     }
 
-    htmlTable += '</tbody></table>'; //closing table
+    htmlTable += '</tbody></table></div>'; //closing table
 
     return htmlTable;
 }

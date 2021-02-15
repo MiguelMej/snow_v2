@@ -1,6 +1,6 @@
 //---------------------------------------------------------------
 // Add comments to incident
-function addIncidentComments (incidentId, comment) {
+function addIncidentComments (environment, incidentId, comment) {
 
     var msg = {
         "properties": {
@@ -11,7 +11,7 @@ function addIncidentComments (incidentId, comment) {
 
     // Building endpoint based on incident id + comments + comment uuid
     incidentId = incidentId + '/comments/' + uuid;
-    var request = buildRESTMessageV2(null, 'put', null, incidentId, msg);
+    var request = buildRESTMessageV2(environment, null, 'put', null, incidentId, msg);
 
     var response = request.execute();
     var httpStatus = response.getStatusCode();
