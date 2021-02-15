@@ -69,7 +69,7 @@ function createIncidents (environment, incidents) {
             myObj = new GlideRecord(incidentTable);
             myObj.get(record);
             myObj.setWorkflow(false);
-            myObj.work_notes = "[code]<div class='snow'><a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a></div>[/code]";
+            myObj.work_notes = "[code]<div class=\"snow\"><a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a></div>[/code]";
             myObj.update();
 
             // Add incident alerts details

@@ -20,6 +20,6 @@ for(var i = 0; i < workspaces.length; i++) {
     }
     catch (ex) {
         var message = ex.message;
-        log('Environment: ' + workspaces[i].environment_name + 'ERROR main createNewIncidents: ' + message);
+        log('Environment: ' + workspaces[i].environment_name + ' ERROR main createNewIncidents: ' + message);
     }
 }

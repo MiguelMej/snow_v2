@@ -2,7 +2,7 @@
 
 function updateSentinelIncident (environment, incidentId, properties) {
     
-    var incident = getSentinelIncidents(incidentId)[0]; // getSentinelIncidents returns an array of one element
+    var incident = getSentinelIncidents(environment, incidentId)[0]; // getSentinelIncidents returns an array of one element
     incident.properties.status = properties.status;
     if(incident.properties.status.toLowerCase() == 'closed') {
         incident.properties.classification = properties.classification; //Sentinel requires reason when closing incident

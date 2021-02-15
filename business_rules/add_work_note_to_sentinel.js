@@ -12,7 +12,7 @@
         //Filtering out Sentinel incidents already added to work notes 
         if (msg.toLowerCase().indexOf('<div class="snow">') === -1) {
 			msg = '<div class="snow">' + msg + '</div>';
-			var httpStatus = addIncidentComments(current.correlation_id, msg);
+			var httpStatus = addIncidentComments(environment, current.correlation_id, msg);
 			if(httpStatus != 201) {
 				log('ERROR: incident ' + current.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
 			}
