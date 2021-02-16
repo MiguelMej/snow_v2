@@ -8,7 +8,6 @@ for(var i = 0; i < workspaces.length; i++) {
         log('Environment: ' + workspaces[i].environment_name + ' - retrieveing modified incidents...');
         var incidents = getSentinelIncidents(workspaces[i], null, 'update');
         var modifiedLastSync = getLastSync('modifiedIncidentsLastSync');
-        updateLastSync('modifiedIncidentsLastSync');
         
         log('Environment: ' + workspaces[i].environment_name + ' - Azure Sentinel API returned ' + incidents.length + ' modified incidents.');
     
@@ -25,3 +24,5 @@ for(var i = 0; i < workspaces.length; i++) {
         log('ERROR main updateChangedIncidents: ' + message);
     }
 }
+
+updateLastSync('modifiedIncidentsLastSync');

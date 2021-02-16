@@ -1,10 +1,15 @@
 (function executeRule(current, previous /*null when async*/) {
 
+	var environmentId = getEnvironmentId(current);
+
 	var gr = new GlideRecord('x_556309_microsoft_workspaces_config');
-	gr.addQuery('environment_id', 'a87e9e1a2f566010b57ebab62799b620');
+	gr.addQuery('environment_id', environmentId);
 	gr.query();
 	if(gr.next()) {
 		var environment = gr;
+	}
+	else {
+		log('ERROR: environment ' + environmentId + 'not found!');
 	}
 
 	try {

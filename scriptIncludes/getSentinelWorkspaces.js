@@ -7,7 +7,19 @@ function getSentinelWorkspaces () {
     var configs = [];
 
     while (gr.next()) {
-        configs.push(gr);
+		var temp = {
+			"caller_id": gr.getValue('caller_id'),
+			"description": gr.getValue('description'),
+			"environment_id": gr.getValue('environment_id'),
+			"environment_name": gr.getValue('environment_name'),
+			"oauth_provider": gr.getValue('oauth_provider'),
+			"resource_group": gr.getValue('resource_group'),
+			"subscription": gr.getValue('subscription'),
+			"sys_id": gr.getValue('sys_id'),
+			"workspace": gr.getValue('workspace')
+			
+		};
+        configs.push(temp);
     }
 
     return configs;

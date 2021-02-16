@@ -1,8 +1,20 @@
 (function executeRule(current, previous) {
+	
+    var environmentId = getEnvironmentId(current);
+
+	var gr = new GlideRecord('x_556309_microsoft_workspaces_config');
+	gr.addQuery('environment_id', environmentId);
+	gr.query();
+	if(gr.next()) {
+		var environment = gr;
+	}
+	else {
+		log('ERROR: environment ' + environmentId + 'not found!');
+	}
 
     try {
             var myObj = current;
-            var incident = getSentinelIncidents(myObj.correlation_id);
+            var incident = getSentinelIncidents(environment, myObj.correlation_id);
             var changes = compareChanges(incident[0].properties, myObj); //changes is an object with all changes
             var properties = incident[0].properties;
             
@@ -63,13 +75,13 @@
                     }
                 }
                 
-                var httpStatus = updateSentinelIncident(myObj.correlation_id, properties); //update Sentinel incident
+                var httpStatus = updateSentinelIncident(environment, myObj.correlation_id, properties); //update Sentinel incident
 
                 if(httpStatus == 200) {
                     log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
                 }
                 else if(httpStatus == 409) {
-                    httpStatus = updateSentinelIncident(myObj.correlation_id, properties);
+                    httpStatus = updateSentinelIncident(environment, myObj.correlation_id, properties);
                     log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
                 }
                 else {

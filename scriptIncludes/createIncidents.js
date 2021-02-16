@@ -2,7 +2,7 @@
 // Create new ServiceNow incidents
 function createIncidents (environment, incidents) {
 
-    var callerId = gs.getProperty('x_556309_microsoft.callerId');
+    var callerId = environment.caller_id;
     var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
     var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
     var createdIncidents = 0;

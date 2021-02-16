@@ -17,7 +17,7 @@ function buildRESTMessageV2(environment, skipToken, method, filter, incidentId, 
 
     // Compose API endpoint
     var endpoint =  'https://management.azure.com/subscriptions/' + subscription + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.OperationalInsights/workspaces/' + workspace + '/providers/Microsoft.SecurityInsights/incidents?';
-    var token = getAccessToken();
+    var token = getAccessToken(environment);
 
 
     request = new sn_ws.RESTMessageV2();
