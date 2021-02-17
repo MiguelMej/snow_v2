@@ -85,7 +85,7 @@ function alertsToHtmlTable (alerts) {
     htmlTable += '<th colspan="2" style=" background-color: #dddddd; border: 2px solid #dddddd; text-align: center; padding: 8px;">Alerts</th>';
     
     var tr = '<tr style="border: 1px solid black"><th style=" background-color: #dddddd; text-align: left; padding: 8px; width:15%;">';
-    var separator = '<tr style="border: 1px solid black"><td colspan="2" style=" background-color: Azure; height: 7px;"></tr>';
+    var separator = '<tr style="border: 1px solid black"><td colspan="2" style=" background-color: black; height: 7px;"></tr>';
     for (var i = 0; i < alerts.length; i++) {
         
         htmlTable += tr + 'Name</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].name + '</td></tr>';
