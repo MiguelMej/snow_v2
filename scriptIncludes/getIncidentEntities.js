@@ -71,12 +71,12 @@ function getIncidentEntities (environment, incidentId, format) {
 
 function entitiesToHtmlTable (entities) {
     
-    var htmlTable = '<div class="snow"><table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black"><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityType</th><th style="background-color: #dddddd;border: 1px solid #dddddd;text-align: left;padding: 8px;">EntityDetails</th></tr></thead><tbody>';
+    var htmlTable = '<div class="snow"><table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black"><th style="background-color: #dddddd; text-align: left;padding: 8px; width: 15%;">EntityType</th><th style="background-color: #dddddd; text-align:center; padding: 8px;">EntityDetails</th></tr></thead><tbody>';
     
     for (var i = 0; i < entities.length; i++) {
-        var tr = '<tr style="border: 1px solid black"><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">';
+        var tr = '<tr style="border: 1px solid black"><th style="text-align: left; padding: 8px; background-color: #dddddd;">';
 
-        tr += entities[i].type + '</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + JSON.stringify(entities[i].details).replace(',', '<br>').replace('{', '').replace('}', '') + '</td></tr>';
+        tr += entities[i].type + '</th><td style="text-align: left; padding: 8px">' + JSON.stringify(entities[i].details).replace('{', '').replace('}', '').replace(',', '<br>') + '</td></tr>';
         htmlTable += tr;
     }
 

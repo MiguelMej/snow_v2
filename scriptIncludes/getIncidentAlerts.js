@@ -82,23 +82,23 @@ function getIncidentAlerts (environment, incidentId, format) {
 function alertsToHtmlTable (alerts) {
     
     var htmlTable = '<div class="snow"><table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black">';
-    htmlTable += '<th colspan="2" style=" background-color: #dddddd; border: 2px solid #dddddd; text-align: center; padding: 8px;">Alerts</th>';
+    htmlTable += '<th colspan="2" style=" background-color: #dddddd; text-align: center; padding: 8px;">Alerts</th>';
     
     var tr = '<tr style="border: 1px solid black"><th style=" background-color: #dddddd; text-align: left; padding: 8px; width:15%;">';
-    var separator = '<tr style="border: 1px solid black"><td colspan="2" style=" background-color: black; height: 7px;"></tr>';
+    var separator = '<tr style="border: 1px solid black"><td colspan="2" style=" background-color: #66666666; height: 7px;"></tr>';
     for (var i = 0; i < alerts.length; i++) {
         
-        htmlTable += tr + 'Name</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].name + '</td></tr>';
-        htmlTable += tr + 'Status</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].status + '</td></tr>';
-        htmlTable += tr + 'Severity</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].severity + '</td></tr>';
-        htmlTable += tr + 'Tactics</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].tactics + '</td></tr>';
-        htmlTable += tr + 'Product</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].product + '</td></tr>';
-        htmlTable += tr + 'Vendor</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].vendor + '</td></tr>';
-        htmlTable += tr + 'Description</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].description + '</td></tr>';
-        htmlTable += tr + 'Confidence Level</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].confidenceLevel + '</td></tr>';
-        htmlTable += tr + 'Link</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + '<a href="' + alerts[i].alertLink + '">alert link</a></td></tr>';
-        htmlTable += tr + 'Start</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].start + '</td></tr>';
-        htmlTable += tr + 'End</th><td style="border: 1px solid #dddddd; text-align: left; padding: 8px">' + alerts[i].end + '</td></tr>';
+        htmlTable += tr + 'Name</th><td style="text-align: left; padding: 8px">' + alerts[i].name + '</td></tr>';
+        htmlTable += tr + 'Status</th><td style="text-align: left; padding: 8px">' + alerts[i].status + '</td></tr>';
+        htmlTable += tr + 'Severity</th><td style="text-align: left; padding: 8px">' + alerts[i].severity + '</td></tr>';
+        htmlTable += tr + 'Tactics</th><td style="text-align: left; padding: 8px">' + alerts[i].tactics + '</td></tr>';
+        htmlTable += tr + 'Product</th><td style="text-align: left; padding: 8px">' + alerts[i].product + '</td></tr>';
+        htmlTable += tr + 'Vendor</th><td style="text-align: left; padding: 8px">' + alerts[i].vendor + '</td></tr>';
+        htmlTable += tr + 'Description</th><td style="text-align: left; padding: 8px">' + alerts[i].description + '</td></tr>';
+        htmlTable += tr + 'Confidence Level</th><td style="text-align: left; padding: 8px">' + alerts[i].confidenceLevel + '</td></tr>';
+        htmlTable += tr + 'Link</th><td style="text-align: left; padding: 8px">' + '<a href="' + alerts[i].alertLink + '" target="_blank">alert link</a></td></tr>';
+        htmlTable += tr + 'Start</th><td style="text-align: left; padding: 8px">' + alerts[i].start + '</td></tr>';
+        htmlTable += tr + 'End</th><td style="text-align: left; padding: 8px">' + alerts[i].end + '</td></tr>';
         
         htmlTable += separator;
     }

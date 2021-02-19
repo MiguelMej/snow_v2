@@ -52,7 +52,7 @@ function createIncidents (environment, incidents) {
             }
             
             // Correlation id is used to link the SNOW incident to Sentinel incident
-            myObj.correlation_id = incidents[i].name;
+            myObj.setValue(incidentUniqueKey, incidents[i].name);
             myObj.caller_id = callerId;
             
             // record contains the snow incident id and incident is saved in the database
