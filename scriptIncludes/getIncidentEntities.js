@@ -1,4 +1,4 @@
-
+t
 //---------------------------------------------------------------
 // Get incident entities 
 function getIncidentEntities (environment, incidentId, format) {
@@ -71,12 +71,33 @@ function getIncidentEntities (environment, incidentId, format) {
 
 function entitiesToHtmlTable (entities) {
     
-    var htmlTable = '<div class="snow"><table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black"><th style="background-color: #dddddd; text-align: left;padding: 8px; width: 15%;">EntityType</th><th style="background-color: #dddddd; text-align:center; padding: 8px;">EntityDetails</th></tr></thead><tbody>';
+    var htmlTable = '<div class="snow"><table style="width: 100%; font-family: arial, sans-serif; border-collapse: collapse"><thead><tr style="border: 1px solid black"><th style="background-color: #dddddd; text-align: left;padding: 8px; width: 10%;">EntityType</th><th style="background-color: #dddddd; text-align:center; padding: 8px;">EntityDetails</th></tr></thead><tbody>';
     
     for (var i = 0; i < entities.length; i++) {
         var tr = '<tr style="border: 1px solid black"><th style="text-align: left; padding: 8px; background-color: #dddddd;">';
 
-        tr += entities[i].type + '</th><td style="text-align: left; padding: 8px">' + JSON.stringify(entities[i].details).replace('{', '').replace('}', '').replace(',', '<br>') + '</td></tr>';
+        tr += entities[i].type + '</th><td style="text-align: left; padding: 8px">';
+        
+        var keys = Object.keys(entities[i].details);
+        var propTable = '<table>';
+
+        for (var j = 0; j < keys.length; j++) {
+            var value = '';
+            if(entities[i].details[keys[j].toString()] instanceof Object) {
+                value = JSON.stringify(entities[i].details[keys[j].toString()]);
+            }
+            else {
+                value = entities[i].details[keys[j].toString()].toString();
+            }
+
+            propTable += '<tr><th>' + keys[j] + '</th><td>' + value + '</td></tr>';
+        }
+
+        propTable += '</table>';
+        tr += propTable;
+        tr += '</td></tr>';
+        
+        
         htmlTable += tr;
     }
 
