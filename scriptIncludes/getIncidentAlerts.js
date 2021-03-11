@@ -1,10 +1,15 @@
 //---------------------------------------------------------------
 // Get incident alerts 
-function getIncidentAlerts (environment, incidentId, format) {
+function getIncidentAlerts (environment, incidentId, format, lastSync) {
 
     var hasNext = false;
     var filter = null;
     var alerts = [];
+
+    if(lastSync) {
+
+        filter = '(properties/timeGenerated gt ' + lastSync + ')';
+    }
 
     // Prepare request
     incidentId = incidentId + '/alerts';

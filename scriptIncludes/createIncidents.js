@@ -76,7 +76,7 @@ function createIncidents (environment, incidents) {
 			var html = getIncidentAlerts(environment, incidents[i].name, 'html');
             if(html) {
                 myObj.setWorkflow(false);
-                myObj.work_notes = '[code]' + html + '[/code]';
+                myObj.work_notes = '[code]<h2>Alerts</h2>' + html + '[/code]';
                 myObj.update();
             }
 
@@ -84,7 +84,7 @@ function createIncidents (environment, incidents) {
             var html = getIncidentEntities(environment, incidents[i].name, 'html');
             if(html) {
                 myObj.setWorkflow(false);
-                myObj.work_notes = '[code]' + html + '[/code]';
+                myObj.work_notes = '[code]<h2>Entities</h2>' + html + '[/code]';
                 myObj.update();
             }
             //Add Sentinel comments to work notes

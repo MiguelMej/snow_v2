@@ -71,7 +71,26 @@ function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSyn
                 });
             }
 
-            
+            // add new alerts sync
+            var htmlAlerts = getIncidentAlerts(environment, incidents[i].name, 'html', modifiedLastSync);
+            if(htmlAlerts) {
+                myObj.setWorkflow(false);
+                myObj.work_notes = '[code]<h2>Alerts (updated)</h2>' + htmlAlerts + '[/code]';
+                myObj.update();
+
+                // Add incident entities to Snow
+                var htmlEntities = getIncidentEntities(environment, incidents[i].name, 'html');
+                if(htmlEntities) {
+                    myObj.setWorkflow(false);
+                    myObj.work_notes = '[code]<h2>Entities (updated)</h2>' + htmlEntities + '[/code]';
+                    myObj.update();
+                }
+
+                log('Incident ' + myObj.number + ' has been updated with new alerts.');
+
+            }
+
+
             if(addedComments > 0 || changes.length > 0) {
                 log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes) + '\nNew comments: ' + addedComments);
             }
