@@ -7,6 +7,8 @@ function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSyn
     var myObj;
     var changes;
     var newComments = [];
+    var utils = new AppUtils();
+
 
     for (var i = 0; i < modifiedIncidents.length; i++) {
 
@@ -23,23 +25,14 @@ function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSyn
                 
                 
                 if(changes.hasOwnProperty('severitySentinel')) {
-                    switch(modifiedIncidents[i].properties.severity.toLowerCase()) {
-                        case 'low': myObj.impact = 3; break;
-                        case 'medium': myObj.impact = 2; break;
-                        case 'high': myObj.impact = 1; break;
-                    }
+                    myObj.impact = utils.getServiceNowSeverity(incidents[i].properties.severity);
                 }
 
                 if(changes.hasOwnProperty('statusSentinel')) { 
-                    switch(modifiedIncidents[i].properties.status.toLowerCase()) {
-                        case 'new': myObj.incident_state = 1; break;
-                        case 'active': myObj.incident_state = 2; break;
-                        case 'closed': {
-                            myObj.incident_state = 6;
-                            myObj.close_code = 'Closed/Resolved By Caller';
-                            myObj.close_notes = 'Incident closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
-                            break;                
-                        }                         
+                    myObj.incident_state = utils.getServiceNowState(incidents[i].properties.status);
+                    if(incidents[i].properties.status.toLowerCase() == 'closed') {
+                        myObj.close_code = 'Closed/Resolved By Caller';
+                        myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
                     }
                 }
 
@@ -53,11 +46,11 @@ function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSyn
                     myObj.setWorkflow(false);
                     myObj.update();
                     updatedIncidents++;
-                    log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));
+                    utils.log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));
                 }
                 catch(ex) {
                     var message = ex.message;
-                    log('ERROR: Incident ' + myObj.number + ' update failed\n' + message);
+                    utils.log('ERROR: Incident ' + myObj.number + ' update failed\n' + message);
                 }
             }
             
@@ -86,13 +79,13 @@ function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSyn
                     myObj.update();
                 }
 
-                log('Incident ' + myObj.number + ' has been updated with new alerts.');
+                utils.log('Incident ' + myObj.number + ' has been updated with new alerts.');
 
             }
 
 
             if(addedComments > 0 || changes.length > 0) {
-                log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes) + '\nNew comments: ' + addedComments);
+                utils.log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes) + '\nNew comments: ' + addedComments);
             }
             
         }

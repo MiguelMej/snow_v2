@@ -224,6 +224,69 @@ AppUtils.prototype = {
         return changes;
     },
 
+    //---------------------------------------------------------------
+    // Returns Sentinel severity, based on the passed ServiceNow severity
+    getSentinelSeverity: function(sev) {
+		var myObj = new GlideRecord('x_556309_microsoft_servicenow_incident_to_sentinel');
+        myObj.addQuery('servicenow_severity', sev.toString());
+        myObj.query();
+
+        if(myObj.next()) {
+            var sentinelSev = myObj.sentinel_severity;
+            return sentinelSev;
+        }
+		else {
+            log('ERROR: No matching Sentinel Severity in table ServiceNow Severity to Sentinel, for severity value: ' + sev);
+        }
+    },
+
+    //---------------------------------------------------------------
+    // Returns ServiceNow severity, based on the passed Sentinel severity
+    getServiceNowSeverity: function(sev) {
+		var myObj = new GlideRecord('x_556309_microsoft_sentinel_incident_to_servicenow');
+        myObj.addQuery('sentinel_severity', sev);
+        myObj.query();
+
+        if(myObj.next()) {
+            var serviceNowSev = parseInt(myObj.servicenow_severity);
+            return serviceNowSev;
+        }
+		else {
+            log('ERROR: No matching ServiceNow Severity in table Sentinel Severity to ServiceNow, for severity value: ' + sev);
+        }
+    },
+
+    //---------------------------------------------------------------
+    // Returns Sentinel state, based on the passed ServiceNow state
+    getSentinelState: function(state) {
+		var myObj = new GlideRecord('x_556309_microsoft_sentinel_state_to_servicenow');
+        myObj.addQuery('servicenow_state', state.toString());
+        myObj.query();
+
+        if(myObj.next()) {
+            var sentinelState = myObj.sentinel_state;
+            return sentinelState;
+        }
+		else {
+            log('ERROR: No matching Sentinel State in table ServiceNow Severity to Sentinel, for state value: ' + sev);
+        }
+    },
+
+    //---------------------------------------------------------------
+    // Returns ServiceNow state, based on the passed Sentinel state
+    getServiceNowState: function(state) {
+		var myObj = new GlideRecord('x_556309_microsoft_servicenow_state_to_sentinel');
+        myObj.addQuery('sentinel_state', state);
+        myObj.query();
+
+        if(myObj.next()) {
+            var serviceNowState = parseInt(myObj.servicenow_state);
+            return serviceNowState;
+        }
+		else {
+            log('ERROR: No matching ServiceNow State in table Sentinel Severity to ServiceNow, for state value: ' + sev);
+        }
+    },
 
     type: 'AppUtils'
 };
