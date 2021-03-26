@@ -6,9 +6,8 @@ function createIncidents (environment, incidents) {
     var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
     var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
     var createdIncidents = 0;
-    var incidentSeverity = 1;
-    var incidentStatus = 1;
     var myObj;
+    var utils = new AppUtils();
 
     for (var i = 0; i < incidents.length; i++) {
 
@@ -21,27 +20,14 @@ function createIncidents (environment, incidents) {
             myObj.initialize();
             myObj.short_description = incidents[i].properties.title + ' - Incident number: ' + incidents[i].properties.incidentNumber;
             myObj.description = 'Environment: ' + environment.environment_name + '\nAzure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join() + '\nIncident link: ' + incidents[i].properties.incidentUrl + '\nEnvironmentID: ' + environment.environment_id;
-            
-            switch(incidents[i].properties.severity.toLowerCase()) {
-                case 'low': incidentSeverity = 3; break;
-                case 'medium': incidentSeverity = 2; break;
-                case 'high': incidentSeverity = 1; break;
-                default: incidentSeverity = 3; break;
+
+            myObj.impact = utils.getServiceNowSeverity(incidents[i].properties.severity); // get the corresponding severity
+
+            myObj.incident_state = utils.getServiceNowState(incidents[i].properties.status); // get the corresponding state
+            if(incidents[i].properties.status.toLowerCase() == 'closed') {
+                myObj.close_code = 'Closed/Resolved By Caller';
+                myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
             }
-            myObj.impact = incidentSeverity;
-            
-            switch(incidents[i].properties.status.toLowerCase()) {
-                case 'new': incidentStatus = 1; break;
-                case 'active': incidentStatus = 2; break;
-                case 'closed': {
-                                    incidentStatus = 6; //In SNOW, "7" is closed, "6" is resolved
-                                    myObj.close_code = 'Closed/Resolved By Caller';
-                                    myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
-                                    break;                
-                                }
-                default: incidentStatus = 1; break;
-            }
-            myObj.incident_state = incidentStatus;
 
             // If owner email empty, use UPN
             if(incidents[i].properties.owner.email) {
@@ -62,7 +48,7 @@ function createIncidents (environment, incidents) {
             }
             catch(ex) {
                 var message = ex.message;
-                log('ERROR inserting incident: ' + message);
+                utils.log('ERROR inserting incident: ' + message);
             }
 
             // Add Sentinel incident url link in work notes
@@ -76,7 +62,7 @@ function createIncidents (environment, incidents) {
 			var html = getIncidentAlerts(environment, incidents[i].name, 'html');
             if(html) {
                 myObj.setWorkflow(false);
-                myObj.work_notes = '[code]' + html + '[/code]';
+                myObj.work_notes = '[code]<h2>Alerts</h2>' + html + '[/code]';
                 myObj.update();
             }
 
@@ -84,7 +70,7 @@ function createIncidents (environment, incidents) {
             var html = getIncidentEntities(environment, incidents[i].name, 'html');
             if(html) {
                 myObj.setWorkflow(false);
-                myObj.work_notes = '[code]' + html + '[/code]';
+                myObj.work_notes = '[code]<h2>Entities</h2>' + html + '[/code]';
                 myObj.update();
             }
             //Add Sentinel comments to work notes
@@ -112,13 +98,13 @@ function createIncidents (environment, incidents) {
                 var msg = '<div class="snow">' + incidentUrl + '</div>';
                 var httpStatus = addIncidentComments(environment, incidents[i].name, msg);
                 if(httpStatus != 201) {
-                    log('ERROR: incident ' + myObj.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
+                    utils.log('ERROR: incident ' + myObj.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
                 }
 
             }
             catch (ex) {
                 var message = ex.message;
-                log('ERROR adding SNOW incident link to Sentinel: ' + message);
+                utils.log('ERROR adding SNOW incident link to Sentinel: ' + message);
             }
             
         }
