@@ -8,6 +8,8 @@ function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSyn
     var changes;
     var newComments = [];
     var utils = new AppUtils();
+    var entitiesUtils = new Entities();
+    var alertsUtils = new Alerts();
 
 
     for (var i = 0; i < modifiedIncidents.length; i++) {
@@ -41,48 +43,56 @@ function updateChangedIncidents (environment, modifiedIncidents, modifiedLastSyn
                         myObj.assigned_to = modifiedIncidents[i].properties.owner.userPrincipalName;
                     }
                 }
+
+                if(changes.hasOwnProperty('newAlerts')) {
+                    // add new alerts sync
+                    var htmlAlerts = alertsUtils.getIncidentAlerts(environment, incidents[i].name, 'html', modifiedLastSync);
+                    if(htmlAlerts) {
+                        myObj.setWorkflow(false);
+                        myObj.work_notes = '[code]<h2>Alerts (updated)</h2>' + htmlAlerts + '[/code]';
+                        myObj.update();
+                        utils.log('Incident ' + myObj.number + ' has been updated with new alerts.');
+
+                    }
+                }
+
+                if(changes.hasOwnProperty('newEntities')) {
+                    // Add incident entities to Snow
+                    var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
+
+                    var htmlEntities = entitiesUtils.entitiesToHtmlTable(incidentEntities);
+                    if(htmlEntities) {
+                        myObj.setWorkflow(false);
+                        myObj.work_notes = '[code]<h2>Entities (updated)</h2>' + htmlEntities + '[/code]';
+                        myObj.update();
+                    }
+                }
+
+                if(changes.hasOwnProperty('newComments')) {
+                    // add comments sync
+                    newComments = getIncidentComments(environment, modifiedIncidents[i].name, modifiedLastSync); //returns added comments since last sync
+                }
+
                 
                 try {
                     myObj.setWorkflow(false);
                     myObj.update();
                     updatedIncidents++;
                     utils.log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));
+
+                    if(newComments.length > 0) {
+                        newComments.forEach(function (comment) {
+                            myObj.work_notes = '[code]<div class="snow"><b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p></div>[/code]';
+                            myObj.update();
+                            addedComments++;
+                        });
+                    }
                 }
                 catch(ex) {
                     var message = ex.message;
                     utils.log('ERROR: Incident ' + myObj.number + ' update failed\n' + message);
                 }
             }
-            
-            // add comments sync
-            newComments = getIncidentComments(environment, modifiedIncidents[i].name, modifiedLastSync); //returns added comments since last sync
-            if(newComments.length > 0) {
-                newComments.forEach(function (comment) {
-                    myObj.work_notes = '[code]<div class="snow"><b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p></div>[/code]';
-                    myObj.update();
-                    addedComments++;
-                });
-            }
-
-            // add new alerts sync
-            var htmlAlerts = getIncidentAlerts(environment, incidents[i].name, 'html', modifiedLastSync);
-            if(htmlAlerts) {
-                myObj.setWorkflow(false);
-                myObj.work_notes = '[code]<h2>Alerts (updated)</h2>' + htmlAlerts + '[/code]';
-                myObj.update();
-
-                // Add incident entities to Snow
-                var htmlEntities = getIncidentEntities(environment, incidents[i].name, 'html');
-                if(htmlEntities) {
-                    myObj.setWorkflow(false);
-                    myObj.work_notes = '[code]<h2>Entities (updated)</h2>' + htmlEntities + '[/code]';
-                    myObj.update();
-                }
-
-                utils.log('Incident ' + myObj.number + ' has been updated with new alerts.');
-
-            }
-
 
             if(addedComments > 0 || changes.length > 0) {
                 utils.log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes) + '\nNew comments: ' + addedComments);

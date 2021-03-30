@@ -1,4 +1,4 @@
-//Function to update Sentinel incidents
+//Function to update Sentinel incidents at creation, by adding labels with th eincident number
 
 function updateSentinelIncident (environment, incidentId, properties) {
     

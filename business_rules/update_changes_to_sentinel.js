@@ -1,7 +1,7 @@
 (function executeRule(current, previous) {
-	
-    var environmentId = getEnvironmentId(current);
-    var utils = new AppUtils();
+	var appUtils = new AppUtils();
+    var environmentId = appUtils.getEnvironmentId(current);
+    var sentinelIncidents = new SentinelIncidents();
 
 	var gr = new GlideRecord('x_556309_microsoft_workspaces_config');
 	gr.addQuery('environment_id', environmentId);
@@ -10,24 +10,24 @@
 		var environment = gr;
 	}
 	else {
-		utils.log('ERROR: environment ' + environmentId + 'not found!');
+		appUtils.log('ERROR: environment ' + environmentId + 'not found!');
 	}
 
     try {
             var myObj = current;
-            var incident = getSentinelIncidents(environment, myObj.correlation_id);
+            var incident = sentinelIncidents.getSentinelIncidents(environment, myObj.correlation_id);
             var changes = compareChanges(incident[0].properties, myObj); //changes is an object with all changes
             var properties = incident[0].properties;
             
             if (Object.keys(changes).length > 0) { //if at least one change
 
                 if(changes.hasOwnProperty('severitySentinel')) { //severity must be updated in Sentinel
-                    properties.severity = (utils.getSentinelSeverity(myObj.impact)).toString();					
+                    properties.severity = (appUtils.getSentinelSeverity(myObj.impact)).toString();					
                
                 }
                 
                 if(changes.hasOwnProperty('statusSentinel')) { //status must be updated in Sentinel
-                    properties.status = (utils.getSentinelState(myObj.state)).toString();
+                    properties.status = (appUtils.getSentinelState(myObj.state)).toString();
 
 					if(properties.status == 'Closed') {
                         properties.classification = 'Undetermined';
@@ -44,17 +44,17 @@
                     }
                 }
                 
-                var httpStatus = updateSentinelIncident(environment, myObj.correlation_id, properties); //update Sentinel incident
+                var httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj.correlation_id, properties); //update Sentinel incident
 
                 if(httpStatus == 200) {
-                    utils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
+                    appUtils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
                 }
                 else if(httpStatus == 409) {
-                    httpStatus = updateSentinelIncident(environment, myObj.correlation_id, properties);
-                    utils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
+                    httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj.correlation_id, properties);
+                    appUtils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
                 }
                 else {
-                    utils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' update fails. Code: ' + httpStatus + '\nChanges: ' + JSON.stringify(changes));
+                    appUtils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' update fails. Code: ' + httpStatus + '\nChanges: ' + JSON.stringify(changes));
                 }
 
             }
@@ -62,6 +62,6 @@
     }
     catch (ex) {
         var message = ex.message;
-        utils.log('ERROR updating incident (business rule)' + current.number + ' - ' + message);
+        appUtils.log('ERROR updating incident (business rule)' + current.number + ' - ' + message);
             }
 })(current, previous);

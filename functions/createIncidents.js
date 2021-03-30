@@ -8,6 +8,8 @@ function createIncidents (environment, incidents) {
     var createdIncidents = 0;
     var myObj;
     var utils = new AppUtils();
+    var entitiesUtils = new Entities();
+    var alertsUtils = new Alerts();
 
     for (var i = 0; i < incidents.length; i++) {
 
@@ -19,7 +21,7 @@ function createIncidents (environment, incidents) {
         if(!myObj.next()) {
             myObj.initialize();
             myObj.short_description = incidents[i].properties.title + ' - Incident number: ' + incidents[i].properties.incidentNumber;
-            myObj.description = 'Environment: ' + environment.environment_name + '\nAzure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join() + '\nIncident link: ' + incidents[i].properties.incidentUrl + '\nEnvironmentID: ' + environment.environment_id;
+            myObj.description = 'Environment: ' + environment.environment_name + '\nAzure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join() + '\nIncident link: ' + incidents[i].properties.incidentUrl + '\nEnvironmentID: ' + environment.sys_id;
 
             myObj.impact = utils.getServiceNowSeverity(incidents[i].properties.severity); // get the corresponding severity
 
@@ -59,7 +61,7 @@ function createIncidents (environment, incidents) {
             myObj.update();
 
             // Add incident alerts details
-			var html = getIncidentAlerts(environment, incidents[i].name, 'html');
+			var html = alertsUtils.getIncidentAlerts(environment, incidents[i].name, 'html');
             if(html) {
                 myObj.setWorkflow(false);
                 myObj.work_notes = '[code]<h2>Alerts</h2>' + html + '[/code]';
@@ -67,7 +69,11 @@ function createIncidents (environment, incidents) {
             }
 
             // Add incident entities to Snow
-            var html = getIncidentEntities(environment, incidents[i].name, 'html');
+            var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
+            var ips = entitiesUtils.getEntitiesByType(incidentEntities, 'ip');
+            utils.log('IP addresses entities: ' + JSON.stringify(ips));
+
+            var html = entitiesUtils.entitiesToHtmlTable(incidentEntities);
             if(html) {
                 myObj.setWorkflow(false);
                 myObj.work_notes = '[code]<h2>Entities</h2>' + html + '[/code]';
