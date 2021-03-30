@@ -28,7 +28,7 @@ AppUtils.prototype = {
 
         // Compose API endpoint
         var endpoint =  'https://management.azure.com/subscriptions/' + subscription + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.OperationalInsights/workspaces/' + workspace + '/providers/Microsoft.SecurityInsights/incidents?';
-        var token = getAccessToken(environment);
+        var token = this.getAccessToken(environment);
 
 
         request = new sn_ws.RESTMessageV2();
@@ -133,7 +133,7 @@ AppUtils.prototype = {
 
         }
         else {
-            log('System property not found!');
+            this.log('System property not found!');
         }
         
         return lastSync;
@@ -153,13 +153,13 @@ AppUtils.prototype = {
         myObj.query();
 
         if(myObj.next()) {            
-            log('Updating ' + property + '\nPrevious value: ' + myObj.value + '\nNew value: ' + now);
+            this.log('Updating ' + property + '\nPrevious value: ' + myObj.value + '\nNew value: ' + now);
             myObj.value = now;
             myObj.update();
 
         }
         else {
-            log('System property not found!');
+            this.log('System property not found!');
         }
     },
 
@@ -175,7 +175,7 @@ AppUtils.prototype = {
             var temp = {
                 "caller_id": gr.getValue('caller_id'),
                 "description": gr.getValue('description'),
-                "environment_id": gr.getValue('environment_id'),
+                "environment_id": gr.getValue('sys_id'),
                 "environment_name": gr.getValue('environment_name'),
                 "oauth_provider": gr.getValue('oauth_provider'),
                 "resource_group": gr.getValue('resource_group'),
@@ -236,7 +236,7 @@ AppUtils.prototype = {
             return sentinelSev;
         }
 		else {
-            log('ERROR: No matching Sentinel Severity in table ServiceNow Severity to Sentinel, for severity value: ' + sev);
+            this.log('ERROR: No matching Sentinel Severity in table ServiceNow Severity to Sentinel, for severity value: ' + sev);
         }
     },
 
@@ -252,7 +252,7 @@ AppUtils.prototype = {
             return serviceNowSev;
         }
 		else {
-            log('ERROR: No matching ServiceNow Severity in table Sentinel Severity to ServiceNow, for severity value: ' + sev);
+            this.log('ERROR: No matching ServiceNow Severity in table Sentinel Severity to ServiceNow, for severity value: ' + sev);
         }
     },
 
@@ -268,7 +268,7 @@ AppUtils.prototype = {
             return sentinelState;
         }
 		else {
-            log('ERROR: No matching Sentinel State in table ServiceNow Severity to Sentinel, for state value: ' + sev);
+            this.log('ERROR: No matching Sentinel State in table ServiceNow Severity to Sentinel, for state value: ' + sev);
         }
     },
 
@@ -284,7 +284,7 @@ AppUtils.prototype = {
             return serviceNowState;
         }
 		else {
-            log('ERROR: No matching ServiceNow State in table Sentinel Severity to ServiceNow, for state value: ' + sev);
+            this.log('ERROR: No matching ServiceNow State in table Sentinel Severity to ServiceNow, for state value: ' + sev);
         }
     },
 

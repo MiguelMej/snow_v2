@@ -1,28 +1,30 @@
 // Retriev all configured workspaces
-var workspaces = getSentinelWorkspaces();
+var sentinelIncidents = new SentinelIncidents();
+var appUtils = new AppUtils();
+var workspaces = appUtils.getSentinelWorkspaces();
 
 for(var i = 0; i < workspaces.length; i++) {
     try {
 
         // Get modified incidents from Azure Sentinel API
-        log('Environment: ' + workspaces[i].environment_name + ' - retrieveing modified incidents...');
-        var incidents = getSentinelIncidents(workspaces[i], null, 'update');
-        var modifiedLastSync = getLastSync('modifiedIncidentsLastSync');
+        appUtils.log('Environment: ' + workspaces[i].environment_name + ' - retrieveing modified incidents...');
+        var incidents = sentinelIncidents.getSentinelIncidents(workspaces[i], null, 'update');
+        var modifiedLastSync = appUtils.getLastSync('modifiedIncidentsLastSync');
         
-        log('Environment: ' + workspaces[i].environment_name + ' - Azure Sentinel API returned ' + incidents.length + ' modified incidents.');
+        appUtils.log('Environment: ' + workspaces[i].environment_name + ' - Azure Sentinel API returned ' + incidents.length + ' modified incidents.');
     
         if(incidents.length > 0){
             // Update incidents in SNOW
-            var modifiedIncidents = updateChangedIncidents(workspaces[i], incidents, modifiedLastSync);
-            log('Environment: ' + workspaces[i].environment_name + ' - Modified incident: ' + modifiedIncidents);
+            var modifiedIncidents = sentinelIncidents.updateChangedIncidents(workspaces[i], incidents, modifiedLastSync);
+            appUtils.log('Environment: ' + workspaces[i].environment_name + ' - Modified incident: ' + modifiedIncidents);
         }
         
     
     }
     catch (ex) {
         var message = ex.message;
-        log('ERROR main updateChangedIncidents: ' + message);
+        appUtils.log('ERROR main updateChangedIncidents: ' + message);
     }
 }
 
-updateLastSync('modifiedIncidentsLastSync');
+appUtils.updateLastSync('modifiedIncidentsLastSync');
