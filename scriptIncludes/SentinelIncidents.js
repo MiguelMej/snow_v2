@@ -78,11 +78,14 @@ SentinelIncidents.prototype = {
         var callerId = environment.caller_id;
         var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
         var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
+        var status = gs.getProperty('x_556309_microsoft.statusField');
+        var severity = gs.getProperty('x_556309_microsoft.severityField');
         var createdIncidents = 0;
         var myObj;
         var appUtils = new AppUtils();
         var entitiesUtils = new Entities();
         var alertsUtils = new Alerts();
+        var customMapping = new CustomMapping();
 
         for (var i = 0; i < incidents.length; i++) {
 
@@ -96,9 +99,9 @@ SentinelIncidents.prototype = {
                 myObj.short_description = incidents[i].properties.title + ' - Incident number: ' + incidents[i].properties.incidentNumber;
                 myObj.description = 'Environment: ' + environment.environment_name + '\nAzure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join() + '\nIncident link: ' + incidents[i].properties.incidentUrl + '\nEnvironmentID: ' + environment.sys_id;
 
-                myObj.impact = appUtils.getServiceNowSeverity(incidents[i].properties.severity); // get the corresponding severity
+                myObj[severity] = appUtils.getServiceNowSeverity(incidents[i].properties.severity); // get the corresponding severity
 
-                myObj.incident_state = appUtils.getServiceNowState(incidents[i].properties.status); // get the corresponding state
+                myObj[status] = appUtils.getServiceNowState(incidents[i].properties.status); // get the corresponding status
                 if(incidents[i].properties.status.toLowerCase() == 'closed') {
                     myObj.close_code = 'Closed/Resolved By Caller';
                     myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
@@ -143,8 +146,28 @@ SentinelIncidents.prototype = {
 
                 // Add incident entities to Snow
                 var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
+                
+                // custom mapping
                 var ips = entitiesUtils.getEntitiesByType(incidentEntities, 'ip');
-                //appUtils.log('IP addresses entities: ' + JSON.stringify(ips));
+                var hosts = entitiesUtils.getEntitiesByType(incidentEntities, 'host');
+                var users = entitiesUtils.getEntitiesByType(incidentEntities, 'account');
+
+                if(ips) {
+                    myObj.u_ips = (ips.map(function (ip) {return ip.details.address;})).join(', ');
+                    appUtils.log(myObj.u_ips);
+                }
+                
+                if(hosts) {
+                    myObj.u_hosts = (hosts.map(function (host) {return host.details.hostName;})).join(', ');
+                    appUtils.log(myObj.u_hosts);
+                }
+                
+                if(users) {
+                    myObj.u_impacted_users = (users.map(function (user) {return user.details.accountName;})).join(', ');
+                    appUtils.log(myObj.u_impacted_users);
+                }
+
+                // end custom mapping
 
                 var html = entitiesUtils.entitiesToHtmlTable(incidentEntities);
                 if(html) {
@@ -194,7 +217,7 @@ SentinelIncidents.prototype = {
 
     },
 
-    //Function to update Sentinel incidents at creation, by adding labels with th eincident number
+    //Function to update Sentinel incidents at creation, by adding labels with the incident number
     updateSentinelIncident: function (environment, incidentId, properties) {
         var appUtils = new AppUtils();
 
@@ -253,6 +276,8 @@ SentinelIncidents.prototype = {
     
         var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
         var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
+        var status = gs.getProperty('x_556309_microsoft.statusField');
+        var severity = gs.getProperty('x_556309_microsoft.severityField');
         var updatedIncidents = 0;
         var addedComments;
         var myObj;
@@ -272,17 +297,17 @@ SentinelIncidents.prototype = {
 
             if(myObj.next()) {
                 
-                changes = compareChanges(modifiedIncidents[i].properties, myObj);
+                changes = appUtils.compareChanges(modifiedIncidents[i].properties, myObj);
 
                 if(Object.keys(changes).length > 0) {
                     
                     
                     if(changes.hasOwnProperty('severitySentinel')) {
-                        myObj.impact = appUtils.getServiceNowSeverity(incidents[i].properties.severity);
+                        myObj[severity] = appUtils.getServiceNowSeverity(incidents[i].properties.severity);
                     }
 
                     if(changes.hasOwnProperty('statusSentinel')) { 
-                        myObj.incident_state = appUtils.getServiceNowState(incidents[i].properties.status);
+                        myObj[status] = appUtils.getServiceNowState(incidents[i].properties.status);
                         if(incidents[i].properties.status.toLowerCase() == 'closed') {
                             myObj.close_code = 'Closed/Resolved By Caller';
                             myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
@@ -311,6 +336,25 @@ SentinelIncidents.prototype = {
                         // Add incident entities to Snow
                         var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
 
+                        var ips = entitiesUtils.getEntitiesByType(incidentEntities, 'ip');
+                        var hosts = entitiesUtils.getEntitiesByType(incidentEntities, 'host');
+                        var users = entitiesUtils.getEntitiesByType(incidentEntities, 'account');
+
+                        if(ips) {
+                            myObj.u_ips = (ips.map(function (ip) {return ip.details.address;})).join(', ');
+                            appUtils.log(myObj.u_ips);
+                        }
+                        
+                        if(hosts) {
+                            myObj.u_hosts = (hosts.map(function (host) {return host.details.hostName;})).join(', ');
+                            appUtils.log(myObj.u_hosts);
+                        }
+                        
+                        if(users) {
+                            myObj.u_impacted_users = (users.map(function (user) {return user.details.accountName;})).join(', ');
+                            appUtils.log(myObj.u_impacted_users);
+                        }
+
                         var htmlEntities = entitiesUtils.entitiesToHtmlTable(incidentEntities);
                         if(htmlEntities) {
                             myObj.setWorkflow(false);
@@ -318,14 +362,13 @@ SentinelIncidents.prototype = {
                             myObj.update();
                         }
                     }
-
-                    if(changes.hasOwnProperty('newComments')) {
-                        // add comments sync
-                        newComments = this.getIncidentComments(environment, modifiedIncidents[i].name, modifiedLastSync); //returns added comments since last sync
-                    }
-
                     
+                    //returns added comments since last sync
+                    newComments = this.getIncidentComments(environment, modifiedIncidents[i].name, modifiedLastSync);
+                    
+
                     try {
+
                         myObj.setWorkflow(false);
                         myObj.update();
                         updatedIncidents++;

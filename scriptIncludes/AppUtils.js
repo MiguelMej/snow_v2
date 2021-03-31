@@ -192,34 +192,31 @@ AppUtils.prototype = {
     //---------------------------------------------------------------
     // Function comparing Sentinel and ServiceNow incidents and returning differences
     compareChanges: function(sentinelIncident, snowIncident) {
+        var status = gs.getProperty('x_556309_microsoft.statusField');
+        var severity = gs.getProperty('x_556309_microsoft.severityField');
         var changes = {};
-        var incidentSeverity;
-        var incidentStatus;
+        var appUtils = new AppUtils();
+        var incidentSeverity = appUtils.getServiceNowSeverity(sentinelIncident.severity);
+        var incidentStatus = appUtils.getServiceNowState(sentinelIncident.status);
 
-        switch(sentinelIncident.severity.toLowerCase()) {
-            case 'low': incidentSeverity = 3; break;
-            case 'medium': incidentSeverity = 2; break;
-            case 'high': incidentSeverity = 1; break;
-        }
-
-        switch(sentinelIncident.status.toLowerCase()) {
-            case 'new': incidentStatus = 1; break;
-            case 'active': incidentStatus = 2; break;
-            case 'closed': incidentStatus = 6; break;                
-        }
-
-        if((incidentStatus != snowIncident.incident_state) && !((incidentStatus == 6) && (snowIncident.incident_state == 7))) {
+        if(sentinelIncident.status != appUtils.getSentinelState(snowIncident[status].toString())) {
             changes.statusSentinel = sentinelIncident.status;
-            changes.statusSnow = snowIncident.incident_state.toString();
-        } // 6 means incident resolved in snow
-        if(incidentSeverity != snowIncident.impact) {
+            changes.statusSnow = snowIncident[status].toString();
+        } 
+
+        if(sentinelIncident.severity != appUtils.getSentinelSeverity(snowIncident[severity].toString())) {
             changes.severitySentinel = sentinelIncident.severity;
-            changes.severitySnow = snowIncident.impact.toString();
+            changes.severitySnow = snowIncident[severity].toString();
         }
-        if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString()) && (sentinelIncident.owner.userPrincipalName != null)) { //should remove the filter. Preventing owner update
+
+        if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString()) && (sentinelIncident.owner.userPrincipalName != null)) { 
             changes.ownerSentinel = sentinelIncident.owner.userPrincipalName; 
             changes.ownerSnow = snowIncident.assigned_to.email.toString();
         }
+
+        // Add new alerts
+
+        // Add new entities
 
         return changes;
     },

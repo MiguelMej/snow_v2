@@ -1,5 +1,7 @@
 (function executeRule(current, previous) {
-	var appUtils = new AppUtils();
+	var status = gs.getProperty('x_556309_microsoft.statusField');
+    var severity = gs.getProperty('x_556309_microsoft.severityField');
+    var appUtils = new AppUtils();
     var environmentId = appUtils.getEnvironmentId(current);
     var sentinelIncidents = new SentinelIncidents();
 
@@ -16,18 +18,18 @@
     try {
             var myObj = current;
             var incident = sentinelIncidents.getSentinelIncidents(environment, myObj.correlation_id);
-            var changes = compareChanges(incident[0].properties, myObj); //changes is an object with all changes
+            var changes = appUtils.compareChanges(incident[0].properties, myObj); //changes is an object with all changes
             var properties = incident[0].properties;
             
             if (Object.keys(changes).length > 0) { //if at least one change
 
                 if(changes.hasOwnProperty('severitySentinel')) { //severity must be updated in Sentinel
-                    properties.severity = (appUtils.getSentinelSeverity(myObj.impact)).toString();					
+                    properties.severity = (appUtils.getSentinelSeverity(myObj[severity])).toString();					
                
                 }
                 
                 if(changes.hasOwnProperty('statusSentinel')) { //status must be updated in Sentinel
-                    properties.status = (appUtils.getSentinelState(myObj.state)).toString();
+                    properties.status = (appUtils.getSentinelState(myObj[status])).toString();
 
 					if(properties.status == 'Closed') {
                         properties.classification = 'Undetermined';

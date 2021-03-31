@@ -113,11 +113,16 @@ Entities.prototype = {
     getEntitiesByType: function(entities, type) {
         var appUtils = new AppUtils();
         
-        var entitiesList = entities.filter(function(entity) {
-            return entity.type.toLowerCase() == type.toLowerCase();
-        });
+        try {
+            var entitiesList = entities.filter(function(entity) {
+                return entity.type.toLowerCase() == type.toLowerCase();
+            });
 
-        return entitiesList;
+            return entitiesList;
+        }
+        catch(err){
+            appUtils.log('ERROR getEntitiesByType: ' + err.message);
+        }
     },
 
 
