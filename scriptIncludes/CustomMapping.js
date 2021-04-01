@@ -24,6 +24,15 @@ CustomMapping.prototype = {
             myObj.u_impacted_users = (users.map(function (user) {return user.details.accountName;})).join(', ');
             appUtils.log(myObj.u_impacted_users);
         }
+
+        myObj.u_other_case_number = incident.property.incidentNumber;
+        myObj.attack_vector = incident.property.additionalData.tactics.toString();
+        myObj.u_alert_source = incident.property.additionalData.alertProductNames;
+        myObj.contact_type = 'SIEM'
+
+        myObj.update();
+
+
     },
     type: 'CustomMapping'
 };
