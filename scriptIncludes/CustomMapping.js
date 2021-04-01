@@ -4,6 +4,7 @@ CustomMapping.prototype = {
     },
     setCustomMapping: function(incident,incidentAlerts, incidentEntities) {
         var entitiesUtils = new Entities();
+        var myObj = new GlideRecord(incidentTable);
         // Add your specific mappings below, using the incident entities and alerts
 
         var ips = entitiesUtils.getEntitiesByType(incidentEntities, 'ip');
@@ -28,7 +29,7 @@ CustomMapping.prototype = {
         myObj.u_other_case_number = incident.property.incidentNumber;
         myObj.attack_vector = incident.property.additionalData.tactics.toString();
         myObj.u_alert_source = incident.property.additionalData.alertProductNames;
-        myObj.contact_type = 'SIEM'
+        myObj.contact_type = 'SIEM';
 
         myObj.update();
 
