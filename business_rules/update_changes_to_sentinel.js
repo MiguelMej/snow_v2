@@ -1,6 +1,7 @@
 (function executeRule(current, previous) {
 	var status = gs.getProperty('x_556309_microsoft.statusField');
     var severity = gs.getProperty('x_556309_microsoft.severityField');
+    var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
     var appUtils = new AppUtils();
     var environmentId = appUtils.getEnvironmentId(current);
     var sentinelIncidents = new SentinelIncidents();
@@ -17,7 +18,7 @@
 
     try {
             var myObj = current;
-            var incident = sentinelIncidents.getSentinelIncidents(environment, myObj.correlation_id);
+            var incident = sentinelIncidents.getSentinelIncidents(environment, myObj[incidentUniqueKey]);
             var changes = appUtils.compareChanges(incident[0].properties, myObj); //changes is an object with all changes
             var properties = incident[0].properties;
             
@@ -25,7 +26,7 @@
 
                 if(changes.hasOwnProperty('severitySentinel')) { //severity must be updated in Sentinel
                     properties.severity = (appUtils.getSentinelSeverity(myObj[severity])).toString();					
-               
+
                 }
                 
                 if(changes.hasOwnProperty('statusSentinel')) { //status must be updated in Sentinel
@@ -46,13 +47,13 @@
                     }
                 }
                 
-                var httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj.correlation_id, properties); //update Sentinel incident
+                var httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj[incidentUniqueKey], properties); //update Sentinel incident
 
                 if(httpStatus == 200) {
                     appUtils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
                 }
                 else if(httpStatus == 409) {
-                    httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj.correlation_id, properties);
+                    httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj[incidentUniqueKey], properties);
                     appUtils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
                 }
                 else {

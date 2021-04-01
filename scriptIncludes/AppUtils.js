@@ -209,14 +209,17 @@ AppUtils.prototype = {
             changes.severitySnow = snowIncident[severity].toString();
         }
 
-        if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString()) && (sentinelIncident.owner.userPrincipalName != null)) { 
+        if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString())) { //&& (sentinelIncident.owner.userPrincipalName != null)
             changes.ownerSentinel = sentinelIncident.owner.userPrincipalName; 
             changes.ownerSnow = snowIncident.assigned_to.email.toString();
         }
 
-        // Add new alerts
+        var incidentMetadata = this.getIncidentMetadata(snowIncident.sys_id.toString());
+        // Check if new alerts
+        if(incidentMetadata.alerts_nbr < sentinelIncident.additionalData.alertsCount){
+            changes.newAlerts = sentinelIncident.additionalData.alertsCount - incidentMetadata.alerts_nbr;
+        }
 
-        // Add new entities
 
         return changes;
     },
@@ -282,6 +285,59 @@ AppUtils.prototype = {
         }
 		else {
             this.log('ERROR: No matching ServiceNow State in table Sentinel Severity to ServiceNow, for state value: ' + sev);
+        }
+    },
+
+    //--------------------------------------------------------------------
+    // Return incident metadata record
+    getIncidentMetadata: function(incidentId) {
+        var myObj = new GlideRecord('x_556309_microsoft_incident_metadata');
+        myObj.addQuery('incident_id', incidentId);
+        myObj.query();
+
+        if(myObj.next()) {
+            return myObj;
+        }
+        else {
+            return null;
+        }
+    },
+
+
+    //--------------------------------------------------------------------
+    // Create record in reference table
+    setIncidentMetadata: function(incidentId, alertsNbr, entitiesNbr) {
+        var myObj = new GlideRecord('x_556309_microsoft_incident_metadata');
+        myObj.addQuery('incident_id', incidentId);
+        myObj.query();
+
+        if(!myObj.next()) {
+            try {
+                myObj.incident_id = incidentId;
+                myObj.alerts_nbr = alertsNbr;
+                myObj.entities_nbr = entitiesNbr;
+                var record = myObj.insert();
+
+                return record;
+            }
+            catch(ex) {
+                var message = ex.message;
+                appUtils.log('ERROR inserting incident_metadata: ' + message);
+            }
+        }
+        else {
+            try {
+                myObj.alerts_nbr = alertsNbr;
+                myObj.entities_nbr = entitiesNbr;
+                var record = myObj.update();
+                
+                return record;
+            }
+            catch(ex) {
+                var message = ex.message;
+                appUtils.log('ERROR updating incident_metadata: ' + message);
+            }
+
         }
     },
 
