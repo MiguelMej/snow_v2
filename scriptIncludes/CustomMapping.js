@@ -4,6 +4,7 @@ CustomMapping.prototype = {
     },
     setCustomMapping: function(incident,incidentAlerts, incidentEntities) {
         var entitiesUtils = new Entities();
+        var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
         var myObj = new GlideRecord(incidentTable);
         // Add your specific mappings below, using the incident entities and alerts
 
