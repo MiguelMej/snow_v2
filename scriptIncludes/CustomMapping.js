@@ -5,8 +5,11 @@ CustomMapping.prototype = {
     setCustomMapping: function(incident,incidentAlerts, incidentEntities) {
         var entitiesUtils = new Entities();
         var incidentTable = gs.getProperty('x_556309_microsoft.incidentTableName');
-        var myObj = new GlideRecord(incidentTable);
         var appUtils = new AppUtils();
+        var myObj = new GlideRecord(incidentTable);
+        myObj.addQuery(incidentUniqueKey, incident.name);
+        myObj.query();
+        
         // Add your specific mappings below, using the incident entities and alerts
 
         try {
@@ -15,17 +18,17 @@ CustomMapping.prototype = {
             var users = entitiesUtils.getEntitiesByType(incidentEntities, 'account');
 
             if(ips) {
-                myObj.u_ips = (ips.map(function (ip) {return ip.details.address;})).join(', ');
+                myObj.u_ips = (ips.map(function (ip) {return ip.details.address;})).join(', '); //source_ip
                 appUtils.log(myObj.u_ips);
             }
             
             if(hosts) {
-                myObj.u_hosts = (hosts.map(function (host) {return host.details.hostName;})).join(', ');
+                myObj.u_hosts = (hosts.map(function (host) {return host.details.hostName;})).join(', '); //u_asset_name
                 appUtils.log(myObj.u_hosts);
             }
             
             if(users) {
-                myObj.u_impacted_users = (users.map(function (user) {return user.details.accountName;})).join(', ');
+                myObj.u_impacted_users = (users.map(function (user) {return user.details.accountName;})).join(', '); //affected_user
                 appUtils.log(myObj.u_impacted_users);
             }
 
