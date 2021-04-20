@@ -128,7 +128,7 @@ AppUtils.prototype = {
                 var date = new Date();
                 date.setDate(date.getDate() - 30);
                 lastSync = date.toISOString();
-                updateLastSync(property, lastSync);
+                this.updateLastSync(property, lastSync);
             }
 
         }
@@ -227,16 +227,20 @@ AppUtils.prototype = {
     //---------------------------------------------------------------
     // Returns Sentinel severity, based on the passed ServiceNow severity
     getSentinelSeverity: function(sev) {
+        this.log('in getSentinelSeverity. Snow severity: ' + sev);
+
 		var myObj = new GlideRecord('x_556309_microsoft_servicenow_incident_to_sentinel');
         myObj.addQuery('servicenow_severity', sev.toString());
         myObj.query();
 
         if(myObj.next()) {
             var sentinelSev = myObj.sentinel_severity;
+            this.log('in getSentinelSeverity. Returned Sentinel severity: ' + sentinelSev);
+
             return sentinelSev;
         }
 		else {
-            this.log('ERROR: No matching Sentinel Severity in table ServiceNow Severity to Sentinel, for severity value: ' + sev);
+            throw {'type': 'getSentinelSeverityError', 'message': 'getSentinelSeverity\nNo matching Sentinel Severity in table ServiceNow Severity to Sentinel, for severity value: ' + sev + '\nCannot find the ServiceNow severity to apply.'};
         }
     },
 
@@ -244,7 +248,7 @@ AppUtils.prototype = {
     // Returns ServiceNow severity, based on the passed Sentinel severity
     getServiceNowSeverity: function(sev) {
 		var myObj = new GlideRecord('x_556309_microsoft_sentinel_incident_to_servicenow');
-        myObj.addQuery('sentinel_severity', sev);
+        myObj.addQuery('sentinel_severity', sev.toString());
         myObj.query();
 
         if(myObj.next()) {
@@ -252,14 +256,14 @@ AppUtils.prototype = {
             return serviceNowSev;
         }
 		else {
-            this.log('ERROR: No matching ServiceNow Severity in table Sentinel Severity to ServiceNow, for severity value: ' + sev);
+            throw {'type': 'getServiceNowSeverityError', 'message': 'getServiceNowSeverity\nNo matching Sentinel Severity in table Sentinel Severity to ServiceNow, for severity value: ' + sev + '\nCannot find the ServiceNow severity to apply.'};
         }
     },
 
     //---------------------------------------------------------------
     // Returns Sentinel state, based on the passed ServiceNow state
     getSentinelState: function(state) {
-		var myObj = new GlideRecord('x_556309_microsoft_sentinel_state_to_servicenow');
+		var myObj = new GlideRecord('x_556309_microsoft_servicenow_state_to_sentinel');
         myObj.addQuery('servicenow_state', state.toString());
         myObj.query();
 
@@ -268,15 +272,15 @@ AppUtils.prototype = {
             return sentinelState;
         }
 		else {
-            this.log('ERROR: No matching Sentinel State in table ServiceNow Severity to Sentinel, for state value: ' + sev);
+            throw {'type': 'getSentinelStateError', 'message': 'getSentinelState\nNo matching Sentinel State in table ServiceNow State to Sentinel, for state value: ' + state + '\nCannot find the Sentinel state to apply.'};
         }
     },
 
     //---------------------------------------------------------------
     // Returns ServiceNow state, based on the passed Sentinel state
     getServiceNowState: function(state) {
-		var myObj = new GlideRecord('x_556309_microsoft_servicenow_state_to_sentinel');
-        myObj.addQuery('sentinel_state', state);
+		var myObj = new GlideRecord('x_556309_microsoft_sentinel_state_to_servicenow');
+        myObj.addQuery('sentinel_state', state.toString());
         myObj.query();
 
         if(myObj.next()) {
@@ -284,7 +288,7 @@ AppUtils.prototype = {
             return serviceNowState;
         }
 		else {
-            this.log('ERROR: No matching ServiceNow State in table Sentinel Severity to ServiceNow, for state value: ' + sev);
+            throw {'type': 'getServiceNowStateError', 'message': 'getServiceNowState\nNo matching ServiceNow State in table Sentinel State to ServiceNow, for state value: ' + state + '\nCannot find the ServiceNow state to apply.'};
         }
     },
 

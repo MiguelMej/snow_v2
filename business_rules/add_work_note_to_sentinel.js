@@ -4,7 +4,7 @@
 	var environmentId = appUtils.getEnvironmentId(current);
 
 	var gr = new GlideRecord('x_556309_microsoft_workspaces_config');
-	gr.addQuery('environment_id', environmentId);
+	gr.addQuery('sys_id', environmentId);
 	gr.query();
 	if(gr.next()) {
 		var environment = gr;

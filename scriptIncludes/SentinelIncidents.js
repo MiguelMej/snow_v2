@@ -52,7 +52,7 @@ SentinelIncidents.prototype = {
                 }
             }
             else {
-                appUtils.log('Environment:' + environment.environment_name + '\nError code: ' + pagedhttpStatus + '\nMessage:\n' + pagedResponseBody);
+                throw {'type': 'getSentinelIncidents', 'message': pagedhttpStatus + '; ' + pagedResponseBody};
             }
 
 
@@ -70,6 +70,7 @@ SentinelIncidents.prototype = {
         }while (hasNext);
         
         return incidents;
+        
     },
 
     //---------------------------------------------------------------
