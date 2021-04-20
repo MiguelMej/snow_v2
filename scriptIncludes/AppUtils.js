@@ -227,16 +227,12 @@ AppUtils.prototype = {
     //---------------------------------------------------------------
     // Returns Sentinel severity, based on the passed ServiceNow severity
     getSentinelSeverity: function(sev) {
-        this.log('in getSentinelSeverity. Snow severity: ' + sev);
-
 		var myObj = new GlideRecord('x_556309_microsoft_servicenow_incident_to_sentinel');
         myObj.addQuery('servicenow_severity', sev.toString());
         myObj.query();
 
         if(myObj.next()) {
             var sentinelSev = myObj.sentinel_severity;
-            this.log('in getSentinelSeverity. Returned Sentinel severity: ' + sentinelSev);
-
             return sentinelSev;
         }
 		else {
