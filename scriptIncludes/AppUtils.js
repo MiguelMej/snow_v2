@@ -18,6 +18,7 @@ AppUtils.prototype = {
         var resourceGroup = environment.resource_group;
         var workspace = environment.workspace;
         var apiVersion = gs.getProperty('x_556309_microsoft.apiVersion');
+        var apiUrl = gs.getProperty('x_556309_microsoft.apiUrl');
 
         if(incidentId)  {
             if(incidentId.includes('/entities') || incidentId.includes('/alerts')) {
@@ -27,7 +28,7 @@ AppUtils.prototype = {
 
 
         // Compose API endpoint
-        var endpoint =  'https://management.azure.com/subscriptions/' + subscription + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.OperationalInsights/workspaces/' + workspace + '/providers/Microsoft.SecurityInsights/incidents?';
+        var endpoint =  apiUrl + '/subscriptions/' + subscription + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.OperationalInsights/workspaces/' + workspace + '/providers/Microsoft.SecurityInsights/incidents?';
         var token = this.getAccessToken(environment);
 
 
@@ -73,7 +74,7 @@ AppUtils.prototype = {
     // Return skiptoken when more results to fetch during the API call
     getSkipToken: function(nextLink) {
         var skipToken = nextLink.split('&');
-        skipToken = skipToken[skipToken.length -1].replace('$skipToken=', ''); //contains skitToken only
+        skipToken = skipToken[skipToken.length -1].replace('$skipToken=', ''); //contains skipToken only
 
         return skipToken;
     },
@@ -81,8 +82,9 @@ AppUtils.prototype = {
     //---------------------------------------------------------------
     // Request access token using the saved application OAuth application
     getAccessToken: function(environment) {
+        var apiUrl = gs.getProperty('x_556309_microsoft.apiUrl');
         var oAuthClient = new sn_auth.GlideOAuthClient();
-        var params = {grant_type:"client_credentials",resource:"https://management.azure.com/"};
+        var params = {grant_type:"client_credentials",resource:apiUrl};
         var tokenResponse = oAuthClient.requestToken(environment.oauth_provider,global.JSON.stringify(params)); //using the Oauth provider specified in the config table
         
         return tokenResponse.getToken();
@@ -209,9 +211,11 @@ AppUtils.prototype = {
             changes.severitySnow = snowIncident[severity].toString();
         }
 
-        if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString())) { //&& (sentinelIncident.owner.userPrincipalName != null)
-            changes.ownerSentinel = sentinelIncident.owner.userPrincipalName; 
-            changes.ownerSnow = snowIncident.assigned_to.email.toString();
+        if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString())) {
+            if(sentinelIncident.owner.userPrincipalName != null && snowIncident.assigned_to.email.toString() != "") {
+                changes.ownerSentinel = sentinelIncident.owner.userPrincipalName; 
+                changes.ownerSnow = snowIncident.assigned_to.email.toString();
+            }
         }
 
         var incidentMetadata = this.getIncidentMetadata(snowIncident.sys_id.toString());
