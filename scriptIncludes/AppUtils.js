@@ -220,8 +220,15 @@ AppUtils.prototype = {
 
         var incidentMetadata = this.getIncidentMetadata(snowIncident.sys_id.toString());
         // Check if new alerts
-        if(incidentMetadata.alerts_nbr < sentinelIncident.additionalData.alertsCount){
-            changes.newAlerts = sentinelIncident.additionalData.alertsCount - incidentMetadata.alerts_nbr;
+        if(incidentMetadata) {
+            if(incidentMetadata.alerts_nbr < sentinelIncident.additionalData.alertsCount){
+                changes.newAlerts = sentinelIncident.additionalData.alertsCount - incidentMetadata.alerts_nbr;
+            }
+        }
+        else {
+            //if no metadata record for the incident, create it
+            var environmentId = appUtils.getEnvironmentId(snowIncident);
+            this.setIncidentMetadata(snowIncident.sys_id.toString(), sentinelIncident.additionalData.alertsCount, 0, environmentId);
         }
 
 
@@ -310,7 +317,7 @@ AppUtils.prototype = {
 
     //--------------------------------------------------------------------
     // Create record in reference table
-    setIncidentMetadata: function(incidentId, alertsNbr, entitiesNbr) {
+    setIncidentMetadata: function(incidentId, alertsNbr, entitiesNbr, environmentId) {
         var myObj = new GlideRecord('x_556309_microsoft_incident_metadata');
         myObj.addQuery('incident_id', incidentId);
         myObj.query();
@@ -320,6 +327,7 @@ AppUtils.prototype = {
                 myObj.incident_id = incidentId;
                 myObj.alerts_nbr = alertsNbr;
                 myObj.entities_nbr = entitiesNbr;
+                myObj.environment_id = environmentId;
                 var record = myObj.insert();
 
                 return record;
@@ -333,6 +341,9 @@ AppUtils.prototype = {
             try {
                 myObj.alerts_nbr = alertsNbr;
                 myObj.entities_nbr = entitiesNbr;
+                if(myObj.environment_id.length == 0) {
+                    myObj.environment_id = environmentId;
+                }
                 var record = myObj.update();
                 
                 return record;

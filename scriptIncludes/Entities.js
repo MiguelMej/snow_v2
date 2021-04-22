@@ -25,7 +25,9 @@ Entities.prototype = {
 
             if(pagedhttpStatus == 200) {
                 
-                entities = entities.concat(pagedObj.entities);
+                if(pagedObj.entities) {
+                    entities = entities.concat(pagedObj.entities);
+                }
             }
             else {
                 appUtils.log('Error code: ' + pagedhttpStatus + '\nMessage:\n' + pagedResponseBody);
@@ -62,7 +64,7 @@ Entities.prototype = {
                 }
             }
             else {
-                return null;
+                return entities;
             }
         }
         catch (ex) {

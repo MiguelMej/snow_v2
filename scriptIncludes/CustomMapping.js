@@ -20,26 +20,27 @@ CustomMapping.prototype = {
                 var users = entitiesUtils.getEntitiesByType(incidentEntities, 'account');
 
                 if(ips) {
-                    myObj.u_ips = (ips.map(function (ip) {return ip.details.address;})).join(', '); //source_ip
-                    appUtils.log(myObj.u_ips);
+                    //myObj.u_ips = (ips.map(function (ip) {return ip.details.address;})).join(', '); //source_ip
+                    //appUtils.log(myObj.u_ips);
                 }
                 
                 if(hosts) {
-                    myObj.u_hosts = (hosts.map(function (host) {return host.details.hostName;})).join(', '); //u_asset_name
-                    appUtils.log(myObj.u_hosts);
+                    //myObj.u_hosts = (hosts.map(function (host) {return host.details.hostName;})).join(', '); //u_asset_name
+                    //appUtils.log(myObj.u_hosts);
                 }
                 
                 if(users) {
-                    myObj.u_impacted_users = (users.map(function (user) {return user.details.accountName;})).join(', '); //affected_user
-                    appUtils.log(myObj.u_impacted_users);
+                    //myObj.u_impacted_users = (users.map(function (user) {return user.details.accountName;})).join(', '); //affected_user
+                    //appUtils.log(myObj.u_impacted_users);
                 }
 
-                myObj.u_other_case_number = incident.properties.incidentNumber;
-                myObj.attack_vector = incident.properties.additionalData.tactics.join(', ');
-                myObj.u_alert_source = incident.properties.additionalData.alertProductNames.join(', ');
-                myObj.contact_type = 'SIEM';
+                //myObj.u_other_case_number = incident.properties.incidentNumber;
+                //myObj.attack_vector = incident.properties.additionalData.tactics.join(', ');
+                //myObj.u_alert_source = incident.properties.additionalData.alertProductNames.join(', ');
+                //myObj.contact_type = 'SIEM';
+                //myObj.business_service = 
 
-                myObj.update();
+                //myObj.update();
 
             }
             catch (err) {

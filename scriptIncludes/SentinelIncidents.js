@@ -90,115 +90,122 @@ SentinelIncidents.prototype = {
         var customMapping = new CustomMapping();
 
         for (var i = 0; i < incidents.length; i++) {
-
-            myObj = new GlideRecord(incidentTable);
-
-            myObj.addQuery(incidentUniqueKey, incidents[i].name);
-            myObj.query();
-
-            if(!myObj.next()) {
-                myObj.initialize();
-                myObj.short_description = incidents[i].properties.title + ' - Incident number: ' + incidents[i].properties.incidentNumber;
-                myObj.description = 'Environment: ' + environment.environment_name + '\nAzure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join() + '\nIncident link: ' + incidents[i].properties.incidentUrl + '\nEnvironmentID: ' + environment.sys_id;
-
-                myObj[severity] = appUtils.getServiceNowSeverity(incidents[i].properties.severity); // get the corresponding severity
-
-                myObj[status] = appUtils.getServiceNowState(incidents[i].properties.status); // get the corresponding status
-                if(incidents[i].properties.status.toLowerCase() == 'closed') {
-                    myObj.close_code = 'Closed/Resolved By Caller';
-                    myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
-                }
-
-                // If owner email empty, use UPN
-                if(incidents[i].properties.owner.email) {
-                    myObj.assigned_to = incidents[i].properties.owner.email;
-                }
-                else {
-                    myObj.assigned_to = incidents[i].properties.owner.userPrincipalName;
-                }
-                
-                // Correlation id is used to link the SNOW incident to Sentinel incident
-                myObj.setValue(incidentUniqueKey, incidents[i].name);
-                myObj.caller_id = callerId;
-                
-                // record contains the snow incident id and incident is saved in the database
-                try {
-                    var record = myObj.insert();
-                    createdIncidents++;
-                }
-                catch(ex) {
-                    var message = ex.message;
-                    appUtils.log('ERROR inserting incident: ' + message);
-                }
-
-                // Add Sentinel incident url link in work notes
+            try {
                 myObj = new GlideRecord(incidentTable);
-                myObj.get(record);
-                myObj.setWorkflow(false);
-                myObj.work_notes = "[code]<div class=\"snow\"><a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a></div>[/code]";
-                myObj.update();
 
-                // Add incident alerts details
-                var incidentAlerts = alertsUtils.getIncidentAlerts(environment, incidents[i].name, 'json');
-                var html = alertsUtils.alertsToHtmlTable(incidentAlerts);
-                if(html) {
-                    myObj.setWorkflow(false);
-                    myObj.work_notes = '[code]<h2>Alerts</h2>' + html + '[/code]';
-                    myObj.update();
-                }
+                myObj.addQuery(incidentUniqueKey, incidents[i].name);
+                myObj.query();
 
-                // Add incident entities to Snow
-                var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
-                
-                // Create Incident metadata related record
-                var incidentMetadata = appUtils.setIncidentMetadata(myObj.sys_id, incidentAlerts.length, incidentEntities.length);
+                if(!myObj.next()) {
+                    myObj.initialize();
+                    myObj.short_description = incidents[i].properties.title + ' - Incident number: ' + incidents[i].properties.incidentNumber;
+                    myObj.description = 'Environment: ' + environment.environment_name + '\nAzure Sentinel incident: ' + incidents[i].properties.incidentNumber + '\nDescription: ' + incidents[i].properties.description + '\nProducts: ' + incidents[i].properties.additionalData.alertProductNames.join() + '\nTactics: ' + incidents[i].properties.additionalData.tactics.join() + '\nIncident link: ' + incidents[i].properties.incidentUrl + '\nEnvironmentID: ' + environment.sys_id;
 
+                    myObj[severity] = appUtils.getServiceNowSeverity(incidents[i].properties.severity); // get the corresponding severity
 
-                // custom mapping
-                customMapping.setCustomMapping(incidents[i],incidentAlerts, incidentEntities);
-
-                var html = entitiesUtils.entitiesToHtmlTable(incidentEntities);
-                if(html) {
-                    myObj.setWorkflow(false);
-                    myObj.work_notes = '[code]<h2>Entities</h2>' + html + '[/code]';
-                    myObj.update();
-                }
-                //Add Sentinel comments to work notes
-                var comments = this.getIncidentComments(environment, incidents[i].name);
-                if(comments) {
-                    comments.forEach(function (comment){
-                        myObj.work_notes = '[code]<div class="snow"><b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p></div>[/code]';
-                        myObj.update();
-                    });
-
-                }
-
-                // Adds ServiceNow incident number in Sentinel tags
-                var labelIncidentId = [{
-                    "labelName": myObj.number.toString(),
-                    "labelType": "User"
-                }];
-                var properties = incidents[i].properties;
-                properties.labels = labelIncidentId;
-                this.updateSentinelIncident(environment, incidents[i].name, properties);
-                
-                // Adds SNOW incident link in Sentinel
-                try {
-                    var incidentUrl = this.createUrlForObject(incidentTable, record);
-                    var msg = '<div class="snow">' + incidentUrl + '</div>';
-                    var httpStatus = this.addIncidentComments(environment, incidents[i].name, msg);
-                    if(httpStatus != 201) {
-                        appUtils.log('ERROR: incident ' + myObj.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
+                    myObj[status] = appUtils.getServiceNowState(incidents[i].properties.status); // get the corresponding status
+                    if(incidents[i].properties.status.toLowerCase() == 'closed') {
+                        myObj.close_code = 'Closed/Resolved By Caller';
+                        myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
                     }
 
-                }
-                catch (ex) {
-                    var message = ex.message;
-                    appUtils.log('ERROR adding SNOW incident link to Sentinel: ' + message);
-                }
-                
-            }
+                    // If owner email empty, use UPN
+                    if(incidents[i].properties.owner.email) {
+                        myObj.assigned_to = incidents[i].properties.owner.email;
+                    }
+                    else {
+                        myObj.assigned_to = incidents[i].properties.owner.userPrincipalName;
+                    }
+                    
+                    // Correlation id is used to link the SNOW incident to Sentinel incident
+                    myObj.setValue(incidentUniqueKey, incidents[i].name);
+                    myObj.caller_id = callerId;
+                    
+                    // record contains the snow incident id and incident is saved in the database
+                    try {
+                        var record = myObj.insert();
+                        createdIncidents++;
+                    }
+                    catch(ex) {
+                        var message = ex.message;
+                        appUtils.log('ERROR inserting incident: ' + message);
+                    }
 
+                    // Add Sentinel incident url link in work notes
+                    myObj = new GlideRecord(incidentTable);
+                    myObj.get(record);
+                    myObj.setWorkflow(false);
+                    myObj.work_notes = "[code]<div class=\"snow\"><a href='" + incidents[i].properties.incidentUrl + "' target='_blank'>Azure Sentinel incident link</a></div>[/code]";
+                    myObj.update();
+
+                    // Add incident alerts details
+                    var incidentAlerts = alertsUtils.getIncidentAlerts(environment, incidents[i].name, 'json');
+                    if(incidentAlerts.length > 0) {    
+                        var html = alertsUtils.alertsToHtmlTable(incidentAlerts);
+                        if(html) {
+                            myObj.setWorkflow(false);
+                            myObj.work_notes = '[code]<h2>Alerts</h2>' + html + '[/code]';
+                            myObj.update();
+                        }
+                    }
+
+                    // Add incident entities to Snow
+                    var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
+                    
+                    // Create Incident metadata related record
+                    var incidentMetadata = appUtils.setIncidentMetadata(myObj.sys_id, incidentAlerts.length, incidentEntities.length, environment.sys_id);
+
+
+                    // custom mapping
+                    customMapping.setCustomMapping(incidents[i],incidentAlerts, incidentEntities);
+
+                    if(incidentEntities.length > 0) {
+                        var html = entitiesUtils.entitiesToHtmlTable(incidentEntities);
+                        if(html) {
+                            myObj.setWorkflow(false);
+                            myObj.work_notes = '[code]<h2>Entities</h2>' + html + '[/code]';
+                            myObj.update();
+                        }
+                    }
+                    //Add Sentinel comments to work notes
+                    var comments = this.getIncidentComments(environment, incidents[i].name);
+                    if(comments) {
+                        comments.forEach(function (comment){
+                            myObj.work_notes = '[code]<div class="snow"><b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p></div>[/code]';
+                            myObj.update();
+                        });
+
+                    }
+
+                    // Adds ServiceNow incident number in Sentinel tags
+                    var labelIncidentId = [{
+                        "labelName": myObj.number.toString(),
+                        "labelType": "User"
+                    }];
+                    var properties = incidents[i].properties;
+                    properties.labels = labelIncidentId;
+                    this.updateSentinelIncident(environment, incidents[i].name, properties);
+                    
+                    // Adds SNOW incident link in Sentinel
+                    try {
+                        var incidentUrl = this.createUrlForObject(incidentTable, record);
+                        var msg = '<div class="snow">' + incidentUrl + '</div>';
+                        var httpStatus = this.addIncidentComments(environment, incidents[i].name, msg);
+                        if(httpStatus != 201) {
+                            appUtils.log('ERROR: incident ' + myObj.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
+                        }
+
+                    }
+                    catch (ex) {
+                        var message = ex.message;
+                        appUtils.log('Environment: ' + environment.environment_name + '- incident:' + incidents[i].name + ' - error in: createIncidents / adding SNOW incident link to Sentinel' + '\n' + message);
+                    }
+                    
+                }
+            }
+            catch(err) {
+                appUtils.log('Environment: ' + environment.environment_name + '- incident:' + incidents[i].name + ' - error in: createIncidents ' + '\n' + err.message);
+            }
         }
 
         return createdIncidents;
@@ -312,61 +319,65 @@ SentinelIncidents.prototype = {
                     
                     if(changes.hasOwnProperty('newAlerts')) {
                         // add new alerts sync
-                        var incidentAlerts = alertsUtils.getIncidentAlerts(environment, incidents[i].name, 'json', modifiedLastSync)
-                        var htmlAlerts = alertsUtils.alertsToHtmlTable(incidentAlerts);
-                        if(htmlAlerts) {
-                            myObj.setWorkflow(false);
-                            myObj.work_notes = '[code]<h2>Alerts (updated)</h2>' + htmlAlerts + '[/code]';
-                            myObj.update();
-                            appUtils.log('Incident ' + myObj.number + ' has been updated with new alerts.');
+                        var incidentAlerts = alertsUtils.getIncidentAlerts(environment, incidents[i].name, 'json', modifiedLastSync);
+                        if(incidentAlerts.length > 0) {
+                            var htmlAlerts = alertsUtils.alertsToHtmlTable(incidentAlerts);
+                            if(htmlAlerts) {
+                                myObj.setWorkflow(false);
+                                myObj.work_notes = '[code]<h2>Alerts (updated)</h2>' + htmlAlerts + '[/code]';
+                                myObj.update();
+                                appUtils.log('Incident ' + myObj.number + ' has been updated with new alerts.');
 
+                            }
                         }
 
 
                         // Add incident entities to Snow
                         var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
-                        var htmlEntities = entitiesUtils.entitiesToHtmlTable(incidentEntities);
-                        if(htmlEntities) {
-                            myObj.setWorkflow(false);
-                            myObj.work_notes = '[code]<h2>Entities (updated)</h2>' + htmlEntities + '[/code]';
-                            myObj.update();
+                        if(incidentEntities.length > 0)
+                        {    var htmlEntities = entitiesUtils.entitiesToHtmlTable(incidentEntities);
+                            if(htmlEntities) {
+                                myObj.setWorkflow(false);
+                                myObj.work_notes = '[code]<h2>Entities (updated)</h2>' + htmlEntities + '[/code]';
+                                myObj.update();
+                            }
                         }
 
                         // Custom mapping
                         customMapping.setCustomMapping(incidents[i],incidentAlerts, incidentEntities);
 
                         // Update metadata counters
-                        var incidentMetadata = appUtils.setIncidentMetadata(myObj.sys_id, incidentAlerts.length, incidentEntities.length);
+                        var incidentMetadata = appUtils.setIncidentMetadata(myObj.sys_id, incidentAlerts.length, incidentEntities.length, environment.sys_id);
 
                     }
-
-                    
-                    //returns added comments since last sync
-                    newComments = this.getIncidentComments(environment, modifiedIncidents[i].name, modifiedLastSync);
-                    
 
                     try {
 
                         myObj.setWorkflow(false);
                         myObj.update();
                         updatedIncidents++;
-                        appUtils.log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));
+                        //appUtils.log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes));
 
-                        if(newComments.length > 0) {
-                            newComments.forEach(function (comment) {
-                                myObj.work_notes = '[code]<div class="snow"><b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p></div>[/code]';
-                                myObj.update();
-                                addedComments++;
-                            });
-                        }
+                        
                     }
                     catch(ex) {
                         var message = ex.message;
                         appUtils.log('ERROR: Incident ' + myObj.number + ' update failed\n' + message);
                     }
+
+                }
+                
+                //returns added comments since last sync
+                newComments = this.getIncidentComments(environment, modifiedIncidents[i].name, modifiedLastSync);
+                if(newComments.length > 0) {
+                    newComments.forEach(function (comment) {
+                        myObj.work_notes = '[code]<div class="snow"><b>CreatedTimeUtc: </b>' + comment.properties.createdTimeUtc + '<br><b>Author: </b>' + comment.properties.author.name + '(' + comment.properties.author.userPrincipalName + ')' + '<p><b>Message:</b><br>' + comment.properties.message + '</p></div>[/code]';
+                        myObj.update();
+                        addedComments++;
+                    });
                 }
 
-                if(addedComments > 0 || changes.length > 0) {
+                if(addedComments > 0 || updatedIncidents > 0) {
                     appUtils.log('Incident ' + myObj.number + ' has been updated\nChanges: ' + JSON.stringify(changes) + '\nNew comments: ' + addedComments);
                 }
                 

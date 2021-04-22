@@ -32,7 +32,7 @@ Alerts.prototype = {
                 alerts = alerts.concat(pagedObj.value);
             }
             else {
-                appUtils.log('Error getting alerts. Error code: ' + pagedhttpStatus + '\nMessage:\n' + pagedResponseBody);
+                throw {'type': 'getIncidentAlerts', 'message': 'Error getting alerts' + pagedhttpStatus + '; ' + pagedResponseBody};
             }
 
 
@@ -77,7 +77,7 @@ Alerts.prototype = {
                 }
             }
             else {
-                return null;
+                return alerts;
             }
         }
         catch (ex) {
