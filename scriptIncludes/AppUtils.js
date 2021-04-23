@@ -108,9 +108,27 @@ AppUtils.prototype = {
     //---------------------------------------------------------------
     //Return the incident environment ID, based on the value provided in the Description setion
     getEnvironmentId: function(incident) {
-        var environmentId = incident.description.split('\n');
-        environmentId = environmentId.pop().split(':')[1].trim();
-    
+	    var environmentId = '';
+        var myObj = new GlideRecord('x_556309_microsoft_incident_metadata');
+	
+        myObj.addQuery('incident_id', incident.sys_id);
+        myObj.query();
+
+        if(myObj.next() && myObj.getValue('environment_id')) {
+		    environmentId = myObj.getValue('environment_id');
+        }
+        else { //fallback attempt to use the environment ID from description, on the last line
+            var ennIdDesc = incident.description.split('\n');
+            ennIdDesc = ennIdDesc.pop();
+
+            if(ennIdDesc.split(':')[0].trim().toLowerCase() == 'environmentid') {
+                environmentId = ennIdDesc.split(':')[1].trim(); // extracts environment ID from description last line
+            }
+            else {
+                throw {'type': 'getEnvironmentIdNotFound', 'message': 'AppUtils / getEnvironmentId: environment not found for incident ' + incident.sys_id};
+            }
+        }
+        
         return environmentId;
     },
 
