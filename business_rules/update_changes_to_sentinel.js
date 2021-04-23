@@ -3,19 +3,20 @@
     var severity = gs.getProperty('x_556309_microsoft.severityField');
     var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
     var appUtils = new AppUtils();
-    var environmentId = appUtils.getEnvironmentId(current);
     var sentinelIncidents = new SentinelIncidents();
 
 	var gr = new GlideRecord('x_556309_microsoft_workspaces_config');
 
     try {
+
+        var environmentId = appUtils.getEnvironmentId(current);
         gr.addQuery('sys_id', environmentId);
         gr.query();
         if(gr.next()) {
             var environment = gr;
         }
         else {
-            throw {'type': 'UnknownEnvironmentId', 'message': 'Business rule - update_changes_to_sentinelenvironment \n' + environmentId + 'not found!'};
+            throw {'type': 'UnknownEnvironmentId', 'message': 'Business rule - update_changes_to_sentinel \nEnvironment: ' + environmentId + ' not found!'};
         }
 
     
@@ -67,6 +68,6 @@
     }
     catch (ex) {
         var message = ex.message;
-        appUtils.log('ERROR updating incident (business rule)' + current.number + '\n' + message);
+        appUtils.log('ERROR updating incident (business rule) ' + current.number + '\n' + message);
             }
 })(current, previous);
