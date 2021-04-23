@@ -224,6 +224,8 @@ SentinelIncidents.prototype = {
         }
         incident.properties.severity = properties.severity;
         if(properties.owner) {
+            //Sentinel API's order of preference will prefer objectId over userPrincipalName if it is not null.
+            incident.properties.owner.objectId = null;
             incident.properties.owner.userPrincipalName = properties.owner.userPrincipalName;
         }
         else {
