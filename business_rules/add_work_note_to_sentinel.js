@@ -1,19 +1,21 @@
 (function executeRule(current, previous /*null when async*/) {
 	var sentinelIncidents = new SentinelIncidents();
 	var appUtils = new AppUtils();
-	var environmentId = appUtils.getEnvironmentId(current);
 
 	var gr = new GlideRecord('x_556309_microsoft_workspaces_config');
-	gr.addQuery('sys_id', environmentId);
-	gr.query();
-	if(gr.next()) {
-		var environment = gr;
-	}
-	else {
-		appUtils.log('ERROR: environment ' + environmentId + 'not found!');
-	}
-
+	
 	try {
+		
+		var environmentId = appUtils.getEnvironmentId(current);
+		gr.addQuery('sys_id', environmentId);
+		gr.query();
+		if(gr.next()) {
+			var environment = gr;
+		}
+		else {
+			throw {'type': 'UnknownEnvironmentId', 'message': 'Business rule - add_work_note_to_sentinel \nEnvironment: ' + environmentId + ' not found!'};
+		}
+
         var msg = current.work_notes.getJournalEntry(1);
         //Filtering out Sentinel incidents already added to work notes 
         if (msg.toLowerCase().indexOf('<div class="snow">') === -1) {
