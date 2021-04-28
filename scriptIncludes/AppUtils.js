@@ -134,26 +134,29 @@ AppUtils.prototype = {
 
     //---------------------------------------------------------------
     // Returns the last creation or update sync from the sentinelUtils table
-    getLastSync: function(property) {
+    getLastSync: function(property, environment) {
 
-        var myObj = new GlideRecord('x_556309_microsoft_systemutils');
+        //var myObj = new GlideRecord('x_556309_microsoft_systemutils');
+        var myObj = new GlideRecord('x_556309_microsoft_workspaces_config');
         var lastSync;
 
-        myObj.addQuery('property', property);
+        myObj.addQuery('sys_id', environment.sys_id);
         myObj.query();
 
         if(myObj.next()) {            
-            lastSync = myObj.value;
+            //lastSync = myObj.value;
+            lastSync = myObj[property.toLowerCase()];
+
             if(!lastSync) { // if value not populated, go back 30 days ago
                 var date = new Date();
                 date.setDate(date.getDate() - 30);
                 lastSync = date.toISOString();
-                this.updateLastSync(property, lastSync);
+                this.updateLastSync(property, lastSync, environment);
             }
 
         }
         else {
-            this.log('System property not found!');
+            throw {'type': 'getLastSync', 'message': 'AppUtils / getLastSync: Error while getting ' + property + '\nProperty not found.'};
         }
         
         return lastSync;
@@ -161,25 +164,26 @@ AppUtils.prototype = {
 
     //---------------------------------------------------------------
     // Updates newIncidentsLastSync
-    updateLastSync: function(property, date) {
+    updateLastSync: function(property, date, environment) {
 
-        var myObj = new GlideRecord('x_556309_microsoft_systemutils');
+        var myObj = new GlideRecord('x_556309_microsoft_workspaces_config');
         var now = (new Date()).toISOString();
         if(date) {
             now = date;
         }
 
-        myObj.addQuery('property', property);
+        myObj.addQuery('sys_id', environment.sys_id);
         myObj.query();
 
         if(myObj.next()) {            
-            this.log('Updating ' + property + '\nPrevious value: ' + myObj.value + '\nNew value: ' + now);
-            myObj.value = now;
+            myObj.setValue(property.toLowerCase(), now);
             myObj.update();
+
+            this.log('Environment ' + myObj.environment_name + ' - Updating ' + property + '\nNew value: ' + myObj[property.toLowerCase()]);
 
         }
         else {
-            this.log('System property not found!');
+            throw {'type': 'updateLastSync', 'message': 'AppUtils / updateLastSync: Error while updating ' + property};
         }
     },
 
@@ -197,6 +201,8 @@ AppUtils.prototype = {
                 "description": gr.getValue('description'),
                 "environment_id": gr.getValue('sys_id'),
                 "environment_name": gr.getValue('environment_name'),
+                'modifiedIncidentsLastSync': gr.getValue('modifiedIncidentsLastSync'),
+                'newIncidentsLastSync': gr.getValue('newIncidentsLastSync'),
                 "oauth_provider": gr.getValue('oauth_provider'),
                 "resource_group": gr.getValue('resource_group'),
                 "subscription": gr.getValue('subscription'),

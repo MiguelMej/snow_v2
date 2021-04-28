@@ -18,7 +18,7 @@ for(var i = 0; i < workspaces.length; i++) {
                 appUtils.log('Environment: ' + workspaces[i].environment_name + ' - New incident created: ' + createdIncidents);
             }
 
-            appUtils.updateLastSync('newIncidentsLastSync');
+            appUtils.updateLastSync('newIncidentsLastSync', null, workspaces[i]);
         }
         catch(err) {
             appUtils.log('Environment: ' + workspaces[i].environment_name + ' - error in: createNewIncidents_job / ' + err.type + '\n' + err.message);

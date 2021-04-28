@@ -14,11 +14,11 @@ SentinelIncidents.prototype = {
 
         if(!id) {
             if(operation === 'update') {
-                lastSync = appUtils.getLastSync('modifiedIncidentsLastSync'); //returns last sync from sentinelUtils table
+                lastSync = appUtils.getLastSync('modifiedIncidentsLastSync', environment); //returns last sync from sentinelUtils table
                 filter = '(properties/lastModifiedTimeUtc gt '+ lastSync + ')';
             }
             else { // searching for new incidents
-                lastSync = appUtils.getLastSync('newIncidentsLastSync');
+                lastSync = appUtils.getLastSync('newIncidentsLastSync', environment);
                 filter = '(properties/createdTimeUtc gt '+ lastSync + ')';
             }
 
