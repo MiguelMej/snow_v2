@@ -2,7 +2,7 @@
 	var sentinelIncidents = new SentinelIncidents();
 	var appUtils = new AppUtils();
 	var incidentUniqueKey = gs.getProperty('x_557806_microsoft.incidentUniqueKey');
-	var gr = new GlideRecord('x_557806_microsoft_workspaces_config');
+	var gr = new GlideRecord('x_557806_microsoft_workspaces_configuration');
 	
 	try {
 		

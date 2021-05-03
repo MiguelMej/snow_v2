@@ -138,7 +138,7 @@ AppUtils.prototype = {
     getLastSync: function(property, environment) {
 
         //var myObj = new GlideRecord('x_557806_microsoft_systemutils');
-        var myObj = new GlideRecord('x_557806_microsoft_workspaces_config');
+        var myObj = new GlideRecord('x_557806_microsoft_workspaces_configuration');
         var lastSync;
 
         myObj.addQuery('sys_id', environment.sys_id);
@@ -167,7 +167,7 @@ AppUtils.prototype = {
     // Updates newIncidentsLastSync
     updateLastSync: function(property, date, environment) {
 
-        var myObj = new GlideRecord('x_557806_microsoft_workspaces_config');
+        var myObj = new GlideRecord('x_557806_microsoft_workspaces_configuration');
         var now = (new Date()).toISOString();
         if(date) {
             now = date;
@@ -190,9 +190,9 @@ AppUtils.prototype = {
 
     //---------------------------------------------------------------
     // Function to get all instances to collect the incidents from.
-    // Workspaces configuration are stored in the "x_557806_microsoft_workspaces_config" (Workspaces Configuration) table
+    // Workspaces configuration are stored in the "x_557806_microsoft_workspaces_configuration" (Workspaces Configuration) table
     getSentinelWorkspaces: function() {
-        var gr = new GlideRecord('x_557806_microsoft_workspaces_config');
+        var gr = new GlideRecord('x_557806_microsoft_workspaces_configuration');
         gr.query();
         var configs = [];
 

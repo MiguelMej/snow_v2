@@ -5,7 +5,7 @@
     var appUtils = new AppUtils();
     var sentinelIncidents = new SentinelIncidents();
 
-	var gr = new GlideRecord('x_557806_microsoft_workspaces_config');
+	var gr = new GlideRecord('x_557806_microsoft_workspaces_configuration');
 
     try {
 
