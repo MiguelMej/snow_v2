@@ -1,7 +1,7 @@
 (function executeRule(current, previous /*null when async*/) {
 	var sentinelIncidents = new SentinelIncidents();
 	var appUtils = new AppUtils();
-
+	var incidentUniqueKey = gs.getProperty('x_556309_microsoft.incidentUniqueKey');
 	var gr = new GlideRecord('x_556309_microsoft_workspaces_config');
 	
 	try {
@@ -20,7 +20,7 @@
         //Filtering out Sentinel incidents already added to work notes 
         if (msg.toLowerCase().indexOf('<div class="snow">') === -1) {
 			msg = '<div class="snow">' + msg + '</div>';
-			var httpStatus = sentinelIncidents.addIncidentComments(environment, current.correlation_id, msg);
+			var httpStatus = sentinelIncidents.addIncidentComments(environment, current[incidentUniqueKey], msg);
 			if(httpStatus != 201) {
 				appUtils.log('ERROR: incident ' + current.number  + '\n' + httpStatus + ' - Comment not added to Sentinel\n' + msg);
 			}

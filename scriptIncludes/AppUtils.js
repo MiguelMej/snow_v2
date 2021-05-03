@@ -87,6 +87,7 @@ AppUtils.prototype = {
         var params = {grant_type:"client_credentials",resource:apiUrl};
         var tokenResponse = oAuthClient.requestToken(environment.oauth_provider,global.JSON.stringify(params)); //using the Oauth provider specified in the config table
         
+
         return tokenResponse.getToken();
     },
 
@@ -222,8 +223,6 @@ AppUtils.prototype = {
         var severity = gs.getProperty('x_556309_microsoft.severityField');
         var changes = {};
         var appUtils = new AppUtils();
-        var incidentSeverity = appUtils.getServiceNowSeverity(sentinelIncident.severity);
-        var incidentStatus = appUtils.getServiceNowState(sentinelIncident.status);
 
         if(sentinelIncident.status != appUtils.getSentinelState(snowIncident[status].toString())) {
             changes.statusSentinel = sentinelIncident.status;
@@ -236,7 +235,12 @@ AppUtils.prototype = {
         }
 
         if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString())) {
-            if(sentinelIncident.owner.userPrincipalName != null && snowIncident.assigned_to.email.toString() != "") {
+            
+            if(sentinelIncident.owner.userPrincipalName == null && snowIncident.assigned_to.email.toString().length == 0) {
+                // no change
+            }
+
+            else {
                 changes.ownerSentinel = sentinelIncident.owner.userPrincipalName; 
                 changes.ownerSnow = snowIncident.assigned_to.email.toString();
             }
