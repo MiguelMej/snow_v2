@@ -1,0 +1,73 @@
+(function executeRule(current, previous) {
+	var status = gs.getProperty('x_557806_microsoft.statusField');
+    var severity = gs.getProperty('x_557806_microsoft.severityField');
+    var incidentUniqueKey = gs.getProperty('x_557806_microsoft.incidentUniqueKey');
+    var appUtils = new AppUtils();
+    var sentinelIncidents = new SentinelIncidents();
+
+	var gr = new GlideRecord('x_557806_microsoft_workspaces_config');
+
+    try {
+
+        var environmentId = appUtils.getEnvironmentId(current);
+        gr.addQuery('sys_id', environmentId);
+        gr.query();
+        if(gr.next()) {
+            var environment = gr;
+        }
+        else {
+            throw {'type': 'UnknownEnvironmentId', 'message': 'Business rule - update_changes_to_sentinel \nEnvironment: ' + environmentId + ' not found!'};
+        }
+
+    
+        var myObj = current;
+        var incident = sentinelIncidents.getSentinelIncidents(environment, myObj[incidentUniqueKey]);
+        var changes = appUtils.compareChanges(incident[0].properties, myObj); //changes is an object with all changes
+        var properties = incident[0].properties;
+        
+        if (Object.keys(changes).length > 0) { //if at least one change
+
+            if(changes.hasOwnProperty('severitySentinel')) { //severity must be updated in Sentinel
+                properties.severity = (appUtils.getSentinelSeverity(myObj[severity])).toString();					
+
+            }
+            
+            if(changes.hasOwnProperty('statusSentinel')) { //status must be updated in Sentinel
+                properties.status = (appUtils.getSentinelState(myObj[status])).toString();
+
+                if(properties.status == 'Closed') {
+                    properties.classification = 'Undetermined';
+                    properties.classificationComment = 'Incident resolved in ServiceNow: ' + current.close_notes;
+                }
+            }
+            
+            if(changes.hasOwnProperty('ownerSentinel')) { //owner must be updated in Sentinel
+                if(!myObj.assigned_to.email.toString()) {
+                    properties.owner = null;
+                }
+                else {
+                    properties.owner.userPrincipalName = myObj.assigned_to.email.toString();
+                }
+            }
+            
+            var httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj[incidentUniqueKey], properties); //update Sentinel incident
+
+            if(httpStatus == 200) {
+                appUtils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
+            }
+            else if(httpStatus == 409) {
+                httpStatus = sentinelIncidents.updateSentinelIncident(environment, myObj[incidentUniqueKey], properties);
+                appUtils.log(httpStatus + ' - Sentinel Incident ' + incident[0].properties.incidentNumber + ' has been updated after snow updates.\nChanges: ' + JSON.stringify(changes));
+            }
+            else {
+                throw {'type': 'updateSentinelIncident', 'message': 'Business rule - update_changes_to_sentinelenvironment / updateSentinelIncident failed.\n' + httpStatus + '\nRequested changes: ' + JSON.stringify(changes)};
+            }
+
+        }
+
+    }
+    catch (ex) {
+        var message = ex.message;
+        appUtils.log('ERROR updating incident (business rule) ' + current.number + '\n' + message);
+            }
+})(current, previous);
