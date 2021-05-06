@@ -301,14 +301,14 @@ SentinelIncidents.prototype = {
                     
                     
                     if(changes.hasOwnProperty('severitySentinel')) {
-                        myObj[severity] = appUtils.getServiceNowSeverity(incidents[i].properties.severity);
+                        myObj[severity] = appUtils.getServiceNowSeverity(modifiedIncidents[i].properties.severity);
                     }
 
                     if(changes.hasOwnProperty('statusSentinel')) { 
-                        myObj[status] = appUtils.getServiceNowState(incidents[i].properties.status);
-                        if(incidents[i].properties.status.toLowerCase() == 'closed') {
+                        myObj[status] = appUtils.getServiceNowState(modifiedIncidents[i].properties.status);
+                        if(modifiedIncidents[i].properties.status.toLowerCase() == 'closed') {
                             myObj.close_code = 'Closed/Resolved By Caller';
-                            myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
+                            myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + modifiedIncidents[i].properties.classification + '\nClose comment: ' + modifiedIncidents[i].properties.classificationComment;
                         }
                     }
 
@@ -321,7 +321,7 @@ SentinelIncidents.prototype = {
                     
                     if(changes.hasOwnProperty('newAlerts')) {
                         // add new alerts sync
-                        var incidentAlerts = alertsUtils.getIncidentAlerts(environment, incidents[i].name, 'json', modifiedLastSync);
+                        var incidentAlerts = alertsUtils.getIncidentAlerts(environment, modifiedIncidents[i].name, 'json', modifiedLastSync);
                         if(incidentAlerts.length > 0) {
                             var htmlAlerts = alertsUtils.alertsToHtmlTable(incidentAlerts);
                             if(htmlAlerts) {
@@ -335,7 +335,7 @@ SentinelIncidents.prototype = {
 
 
                         // Add incident entities to Snow
-                        var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
+                        var incidentEntities =  entitiesUtils.getIncidentEntities(environment, modifiedIncidents[i].name, 'json');
                         if(incidentEntities.length > 0)
                         {    var htmlEntities = entitiesUtils.entitiesToHtmlTable(incidentEntities);
                             if(htmlEntities) {
@@ -346,7 +346,7 @@ SentinelIncidents.prototype = {
                         }
 
                         // Custom mapping
-                        customMapping.setCustomMapping(incidents[i],incidentAlerts, incidentEntities);
+                        customMapping.setCustomMapping(modifiedIncidents[i],incidentAlerts, incidentEntities);
 
                         // Update metadata counters
                         var incidentMetadata = appUtils.setIncidentMetadata(myObj.sys_id, incidentAlerts.length, incidentEntities.length, environment.sys_id);

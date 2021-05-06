@@ -5,7 +5,7 @@ date.setDate(date.getDate() - 30);
 var lastSync = date.toISOString();
 
 // Initialize the first Azure Sentinel workspace configuration
-var workspaceConfig = new GlideRecord("x_557806_microsoft_workspaces_config");
+var workspaceConfig = new GlideRecord("x_557806_microsoft_workspaces_configuration");
 workspaceConfig.name = 'Company Sentinel Workspace';
 workspaceConfig.insert();
 
