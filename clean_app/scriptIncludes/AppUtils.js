@@ -193,6 +193,7 @@ AppUtils.prototype = {
     // Workspaces configuration are stored in the "x_557806_microsoft_workspaces_configuration" (Workspaces Configuration) table
     getSentinelWorkspaces: function() {
         var gr = new GlideRecord('x_557806_microsoft_workspaces_configuration');
+        gr.addQuery('enabled', 'yes');
         gr.query();
         var configs = [];
 

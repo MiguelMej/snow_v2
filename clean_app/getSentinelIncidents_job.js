@@ -3,6 +3,10 @@ var appUtils = new AppUtils();
 var workspaces = appUtils.getSentinelWorkspaces();
 var sentinelIncidents = new SentinelIncidents();
 
+if(workspaces.length == 0) {
+	appUtils.log('No active workspace');
+}
+
 for(var i = 0; i < workspaces.length; i++) {
 
     // Retrieve and create workspace's new incidents since last sync
