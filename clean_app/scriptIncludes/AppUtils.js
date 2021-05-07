@@ -203,6 +203,7 @@ AppUtils.prototype = {
                 "description": gr.getValue('description'),
                 "environment_id": gr.getValue('sys_id'),
                 "environment_name": gr.getValue('environment_name'),
+                "filter": gr.getValue('filter'),
                 'modifiedIncidentsLastSync': gr.getValue('modifiedIncidentsLastSync'),
                 'newIncidentsLastSync': gr.getValue('newIncidentsLastSync'),
                 "oauth_provider": gr.getValue('oauth_provider'),

@@ -9,7 +9,7 @@ SentinelIncidents.prototype = {
 
         var filter = null;
         var lastSync = null;
-        var customFilter = gs.getProperty('x_557806_microsoft.newIncidentsFilter');
+        var customFilter = environment.filter;
         var appUtils = new AppUtils();
 
         if(!id) {
@@ -23,7 +23,7 @@ SentinelIncidents.prototype = {
             }
 
             // If there is a custom filter added in the app system properties, in addition to the time
-            if(customFilter.length > 0) {
+            if(customFilter) {
                 filter += ' and ' + customFilter;
             }
         }
