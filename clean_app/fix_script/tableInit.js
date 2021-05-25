@@ -61,11 +61,11 @@ for(var i=0; i < sentinelStates.length; i++) {
     sentinelStatesRecord.sentinel_state = sentinelStates[i];
 
     switch (sentinelStates[i]) {
-        case 'New': sentinelStatesRecord.servicenow_state = '10';
+        case 'New': sentinelStatesRecord.servicenow_state = '1';
             break;
-        case 'Active': sentinelStatesRecord.servicenow_state = '16';
+        case 'Active': sentinelStatesRecord.servicenow_state = '2';
             break;
-        case 'Closed': sentinelStatesRecord.servicenow_state = '3';
+        case 'Closed': sentinelStatesRecord.servicenow_state = '6';
             break;
     }
     sentinelStatesRecord.insert();
