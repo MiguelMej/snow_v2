@@ -148,6 +148,10 @@ SentinelIncidents.prototype = {
                             myObj.update();
                         }
                     }
+                    else {
+                        myObj.work_notes = '[code]<h2>No Alerts returned by the API</h2>[/code]';
+                        myObj.update();
+                }
 
                     // Add incident entities to Snow
                     var incidentEntities =  entitiesUtils.getIncidentEntities(environment, incidents[i].name, 'json');
@@ -166,6 +170,10 @@ SentinelIncidents.prototype = {
                             myObj.work_notes = '[code]<h2>Entities</h2>' + html + '[/code]';
                             myObj.update();
                         }
+                    }
+                    else {
+                            myObj.work_notes = '[code]<h2>No Entities returned by the API</h2>[/code]';
+                            myObj.update();
                     }
                     //Add Sentinel comments to work notes
                     var comments = this.getIncidentComments(environment, incidents[i].name);
