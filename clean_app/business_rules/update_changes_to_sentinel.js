@@ -36,7 +36,15 @@
                 properties.status = (appUtils.getSentinelState(myObj[status])).toString();
 
                 if(properties.status == 'Closed') {
-                    properties.classification = 'Undetermined';
+                    var closureCode = appUtils.getClosureCode(null, myObj.close_code, 'servicenow');
+
+                    if(closureCode != 'Undetermined') {
+                        properties.classification = closureCode.split('-')[0];
+                        properties.classificationReason = closureCode.split('-')[1];
+                    }
+                    else {
+                        properties.classification = 'Undetermined';
+                    }
                     properties.classificationComment = 'Incident resolved in ServiceNow: ' + current.close_notes;
                 }
             }

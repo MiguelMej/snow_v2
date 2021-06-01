@@ -386,5 +386,45 @@ AppUtils.prototype = {
         }
     },
 
+    //--------------------------------------------------------------------
+    // Return the corresponding closing code value for the other system
+    getClosureCode: function(sentinelCode, snowCode, source) {
+		var myObj = new GlideRecord('x_557806_microsoft_closure_classification');
+        
+        // To return ServiceNow code
+        if(source.toLowerCase() == 'sentinel') {
+            myObj.addEncodedQuery('sentinelcode=' + sentinelCode + '^sourceissentinel=true');
+            
+        }
+        // To return Sentinel code
+        else {
+            myObj.addQuery('servicenowcode', snowCode.toString());
+        }
+        
+        myObj.query();
+
+        if(myObj.next()) {
+            var closureCode;
+
+            if(source.toLowerCase() == 'sentinel') {
+                closureCode = myObj.servicenowcode;
+            }
+            else {
+                closureCode = myObj.sentinelcode;
+            }
+            return closureCode;
+        }
+		else {
+            //throw {'type': 'getClosureCode', 'message': 'getClosureCode\nNo matching Closure code for sentinelCode: ' + sentinelCode + ', snowCode: '+ snowCode + '\nSource: ' + source};
+            if(source.toLowerCase() == 'sentinel') {
+                return 'Closed/Resolved By Caller';
+            }
+            else {
+                return 'Undetermined';
+            }
+        }
+    },
+
     type: 'AppUtils'
 };
+

@@ -105,8 +105,10 @@ SentinelIncidents.prototype = {
 
                     myObj[status] = appUtils.getServiceNowState(incidents[i].properties.status); // get the corresponding status
                     if(incidents[i].properties.status.toLowerCase() == 'closed') {
-                        myObj.close_code = 'Closed/Resolved By Caller';
-                        myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidents[i].properties.classification + '\nClose comment: ' + incidents[i].properties.classificationComment;
+                        var incidentClosureCode = incidents[i].properties.classification + '-' + incidents[i].properties.classificationReason;
+
+                        myObj.close_code = appUtils.getClosureCode(incidentClosureCode, null, 'sentinel');
+                        myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidentClosureCode + '\nClose comment: ' + incidents[i].properties.classificationComment;
                     }
 
                     // If owner email empty, use UPN
@@ -315,8 +317,11 @@ SentinelIncidents.prototype = {
                     if(changes.hasOwnProperty('statusSentinel')) { 
                         myObj[status] = appUtils.getServiceNowState(modifiedIncidents[i].properties.status);
                         if(modifiedIncidents[i].properties.status.toLowerCase() == 'closed') {
-                            myObj.close_code = 'Closed/Resolved By Caller';
-                            myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + modifiedIncidents[i].properties.classification + '\nClose comment: ' + modifiedIncidents[i].properties.classificationComment;
+                            var incidentClosureCode = modifiedIncidents[i].properties.classification + '-' + modifiedIncidents[i].properties.classificationReason;
+
+                            myObj.close_code = appUtils.getClosureCode(incidentClosureCode, null, 'sentinel');
+                            myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidentClosureCode + '\nClose comment: ' + modifiedIncidents[i].properties.classificationComment;
+                        
                         }
                     }
 
