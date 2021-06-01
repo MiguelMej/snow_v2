@@ -230,6 +230,7 @@ SentinelIncidents.prototype = {
         incident.properties.status = properties.status;
         if(incident.properties.status.toLowerCase() == 'closed') {
             incident.properties.classification = properties.classification; //Sentinel requires reason when closing incident
+            incident.properties.classificationReason = properties.classificationReason;
             incident.properties.classificationComment = properties.classificationComment;
         }
         incident.properties.severity = properties.severity;
