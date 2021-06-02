@@ -107,7 +107,7 @@ SentinelIncidents.prototype = {
                     if(incidents[i].properties.status.toLowerCase() == 'closed') {
                         var incidentClosureCode = incidents[i].properties.classification + '-' + incidents[i].properties.classificationReason;
 
-                        myObj.close_code = appUtils.getClosureCode(incidentClosureCode, null, 'sentinel');
+                        myObj.close_code.value = appUtils.getClosureCode(incidentClosureCode, null, 'sentinel');
                         myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidentClosureCode + '\nClose comment: ' + incidents[i].properties.classificationComment;
                     }
 
@@ -233,6 +233,12 @@ SentinelIncidents.prototype = {
             incident.properties.classificationReason = properties.classificationReason;
             incident.properties.classificationComment = properties.classificationComment;
         }
+        else {
+            incident.properties.classification = null;
+            incident.properties.classificationReason = null;
+            incident.properties.classificationComment = null;
+        }
+
         incident.properties.severity = properties.severity;
         if(properties.owner) {
             //Sentinel API's order of preference will prefer objectId over userPrincipalName if it is not null.
@@ -320,7 +326,7 @@ SentinelIncidents.prototype = {
                         if(modifiedIncidents[i].properties.status.toLowerCase() == 'closed') {
                             var incidentClosureCode = modifiedIncidents[i].properties.classification + '-' + modifiedIncidents[i].properties.classificationReason;
 
-                            myObj.close_code = appUtils.getClosureCode(incidentClosureCode, null, 'sentinel');
+                            myObj.close_code.value = appUtils.getClosureCode(incidentClosureCode, null, 'sentinel');
                             myObj.close_notes = 'Incident was already closed in Sentinel. \nIncident classification: ' + incidentClosureCode + '\nClose comment: ' + modifiedIncidents[i].properties.classificationComment;
                         
                         }
