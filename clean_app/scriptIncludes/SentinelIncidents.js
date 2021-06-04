@@ -314,6 +314,27 @@ SentinelIncidents.prototype = {
                 
                 changes = appUtils.compareChanges(modifiedIncidents[i].properties, myObj);
 
+                // Add incident entities to Snow if new entities have been added after incident creation
+                var incidentMetadataEntities = appUtils.getIncidentMetadata(myObj.sys_id.toString());
+                // Check if new entities
+                if(incidentMetadataEntities) {
+                                  
+                    var incidentEntities =  entitiesUtils.getIncidentEntities(environment, modifiedIncidents[i].name, 'json');
+                    
+                    if(incidentEntities.length > parseInt(incidentMetadataEntities.entities_nbr))
+                    {    
+                        appUtils.log('Incident ' + myObj.number + ' updated number of entities.\nPrevious value: ' + incidentMetadataEntities.entities_nbr + '\nNew value: ' + incidentEntities.length);
+                        var htmlEntities = entitiesUtils.entitiesToHtmlTable(incidentEntities);
+                        if(htmlEntities) {
+                            myObj.setWorkflow(false);
+                            myObj.work_notes = '[code]<h2>Entities (updated)</h2>' + htmlEntities + '[/code]';
+                            myObj.update();
+                        }
+                        //update incident metadata value
+                        appUtils.setIncidentMetadata(myObj.sys_id.toString(), incidentMetadataEntities.alerts_nbr, incidentEntities.length, environment.sys_id);
+                    }
+                }
+
                 if(Object.keys(changes).length > 0) {
                     
                     
@@ -341,29 +362,33 @@ SentinelIncidents.prototype = {
                     
                     if(changes.hasOwnProperty('newAlerts')) {
                         // add new alerts sync
+                        incidentMetadataEntities = appUtils.getIncidentMetadata(myObj.sys_id.toString());
                         var incidentAlerts = alertsUtils.getIncidentAlerts(environment, modifiedIncidents[i].name, 'json', modifiedLastSync);
-                        if(incidentAlerts.length > 0) {
-                            var htmlAlerts = alertsUtils.alertsToHtmlTable(incidentAlerts);
+                        if(incidentAlerts.length > 0 && incidentAlerts.length > parseInt(incidentMetadataEntities.alerts_nbr)) {
+                            
+                            //get only new alerts
+                            incidentAlerts.sort(function(a, b){
+                                var x = new Date(a.end);
+                                var y = new Date(b.end);
+                                if (x < y) {return -1;}
+                                if (x > y) {return 1;}
+                                return 0;
+                            });
+
+                            var newAlerts = incidentAlerts.slice(parseInt(incidentMetadataEntities.alerts_nbr)); //start index at new alerts
+
+
+                            appUtils.log('Incident ' + myObj.number + ' updated number of alerts.\nPrevious value: ' + incidentMetadataEntities.alerts_nbr + '\nNew value: ' + incidentAlerts.length);
+                            //add filter for newest alerts
+                            var htmlAlerts = alertsUtils.alertsToHtmlTable(newAlerts);
                             if(htmlAlerts) {
                                 myObj.setWorkflow(false);
                                 myObj.work_notes = '[code]<h2>Alerts (updated)</h2>' + htmlAlerts + '[/code]';
                                 myObj.update();
-                                appUtils.log('Incident ' + myObj.number + ' has been updated with new alerts.');
 
                             }
                         }
-
-
-                        // Add incident entities to Snow
-                        var incidentEntities =  entitiesUtils.getIncidentEntities(environment, modifiedIncidents[i].name, 'json');
-                        if(incidentEntities.length > 0)
-                        {    var htmlEntities = entitiesUtils.entitiesToHtmlTable(incidentEntities);
-                            if(htmlEntities) {
-                                myObj.setWorkflow(false);
-                                myObj.work_notes = '[code]<h2>Entities (updated)</h2>' + htmlEntities + '[/code]';
-                                myObj.update();
-                            }
-                        }
+                        //entities
 
                         // Custom mapping
                         customMapping.setCustomMapping(modifiedIncidents[i],incidentAlerts, incidentEntities);

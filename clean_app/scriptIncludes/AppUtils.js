@@ -236,7 +236,13 @@ AppUtils.prototype = {
             changes.severitySnow = snowIncident[severity].toString();
         }
 
-        if((sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString())) {
+        //If values, convert to lower case
+        if(sentinelIncident.owner.userPrincipalName) {
+            sentinelIncident.owner.userPrincipalName = sentinelIncident.owner.userPrincipalName.toLowerCase();
+            
+        }
+
+        if(sentinelIncident.owner.userPrincipalName != snowIncident.assigned_to.email.toString().toLowerCase()) {
             
             if(sentinelIncident.owner.userPrincipalName == null && snowIncident.assigned_to.email.toString().length == 0) {
                 // no change
