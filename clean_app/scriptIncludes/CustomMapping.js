@@ -38,7 +38,15 @@ CustomMapping.prototype = {
                 //myObj.attack_vector = incident.properties.additionalData.tactics.join(', ');
                 //myObj.u_alert_source = incident.properties.additionalData.alertProductNames.join(', ');
                 //myObj.contact_type = 'SIEM';
-                //myObj.business_service = 
+                //myObj.business_service = 'xxx';
+
+                //var myci = new GlideRecord('cmdb_ci');
+                //myci.addQuery('name',myObj.u_asset_name);
+                //myci.query();
+                //if (myci.next()){ 
+                //myObj.cmdb_ci = myci.sys_id.toString();
+
+                //}
 
                 //myObj.update();
 
