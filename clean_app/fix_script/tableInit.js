@@ -110,4 +110,36 @@ for(var i=0; i < snowStates.length; i++) {
 }
 
 
+// Initialize "ServiceNow State to Sentinel" table (x_557806_microsoft_sentinel_state_to_servicenow)
+var snowCodes = ['200', '201', '202', '203', '204', '205', '206', '207', '208'];
+var closureClassificationRecord = new GlideRecord("x_557806_microsoft_closure_classification");
+
+for(var i=0; i < snowCodes.length; i++) {
+    closureClassificationRecord.initialize();
+    closureClassificationRecord.servicenowcode = snowCodes[i];
+    closureClassificationRecord.label = 'Closure code - ' + snowCodes[i];
+
+    switch (snowCodes[i]) {
+        case '200': closureClassificationRecord.sentinelcode = 'TruePositive-SuspiciousActivity'; closureClassificationRecord.sourceissentinel = true;
+            break;
+        case '201': closureClassificationRecord.sentinelcode = 'BenignPositive-SuspiciousButExpected'; closureClassificationRecord.sourceissentinel = true;
+            break;
+        case '202': closureClassificationRecord.sentinelcode = 'FalsePositive-InaccurateData'; closureClassificationRecord.sourceissentinel = true;
+            break;
+        case '203': closureClassificationRecord.sentinelcode = 'FalsePositive-IncorrectAlertLogic'; closureClassificationRecord.sourceissentinel = true;
+            break;
+        case '204': closureClassificationRecord.sentinelcode = 'Undetermined'; closureClassificationRecord.sourceissentinel = true;
+            break;
+        case '205': closureClassificationRecord.sentinelcode = 'Undetermined'; closureClassificationRecord.sourceissentinel = false;
+            break;
+        case '206': closureClassificationRecord.sentinelcode = 'Undetermined'; closureClassificationRecord.sourceissentinel = false;
+            break;
+        case '207': closureClassificationRecord.sentinelcode = 'Undetermined'; closureClassificationRecord.sourceissentinel = false;
+            break;
+        case '208': closureClassificationRecord.sentinelcode = 'Undetermined'; closureClassificationRecord.sourceissentinel = false;
+            break;
+        
+    }
+    snowStatesRecord.insert();
+}
 
