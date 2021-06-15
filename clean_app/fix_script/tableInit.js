@@ -140,6 +140,6 @@ for(var i=0; i < snowCodes.length; i++) {
             break;
         
     }
-    snowStatesRecord.insert();
+    closureClassificationRecord.insert();
 }
 
