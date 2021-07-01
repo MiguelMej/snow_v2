@@ -14,7 +14,7 @@ SentinelIncidents.prototype = {
 
         if(!id) {
             if(operation === 'update') {
-                lastSync = appUtils.getLastSync('modifiedIncidentsLastSync', environment); //returns last sync from sentinelUtils table
+                lastSync = appUtils.getLastSync('modifiedIncidentsLastSync', environment); //returns last sync from Workspace configuration table
                 filter = '(properties/lastModifiedTimeUtc gt '+ lastSync + ')';
             }
             else { // searching for new incidents
